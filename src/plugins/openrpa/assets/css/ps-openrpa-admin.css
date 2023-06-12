@@ -1,0 +1,41 @@
+/****************/
+/* TOP template */
+/****************/
+.howto-div {
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+
+/*****************/
+/* TASK template */
+/*****************/
+.task-pagination .page-numbers {
+	padding: 10px;
+	border: 1px solid gray;
+	border-radius: 3px;
+	background: ghostwhite;
+	color: black;
+	text-decoration: none;
+}
+
+.task-pagination .current {
+	background: lightsteelblue;
+}
+
+/********************/
+/* HISTORY template */
+/********************/
+.history-pagination .page-numbers {
+	padding: 10px;
+	border: 1px solid gray;
+	border-radius: 3px;
+	background: ghostwhite;
+	color: black;
+	text-decoration: none;
+}
+
+.history-pagination .current {
+	background: lightsteelblue;
+}
+
