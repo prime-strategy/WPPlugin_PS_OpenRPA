@@ -334,7 +334,7 @@ class PS_OpenRPA_API_Method {
 	public function get_user_task( $user_id ) {
 		$response = array();
 		
-		date_default_timezone_set('Asia/Tokyo');
+		date_default_timezone_set( get_option( 'timezone_string' ) );
 		$now = new DateTime();
 		$now = $now->format('Y-m-d H:i:s');
 		$args = array(
