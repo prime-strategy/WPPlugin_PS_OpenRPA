@@ -348,7 +348,7 @@
 							<select class="form-select" name="minute">
 							<?php
 								for( $i = 0; $i < 60; $i+=5 ) {
-									echo "<option value={$i}>{$i}</option>";
+									echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . '</option>';
 								}
 							?>
 							</select>
@@ -416,7 +416,7 @@
 									<select class="form-select" name="minute">
 									<?php
 										for( $i = 0; $i < 60; $i+=5 ) {
-											echo "<option value={$i}>{$i}</option>";
+											echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . '</option>';
 										}
 									?>
 									</select>
@@ -484,11 +484,11 @@
 									$schedules_tag .= "<form action='' method='post'><button type='submit' class='btn btn-light' name='delete_schedule' value={$metas} style='vertical-align: baseline; color: red; margin: 2px 5px 2px; padding: 2px;'>×</button><span>{$schedule['description']}</span></form>";
 								}
 								echo '<tr>';
-								echo "<td class='align-middle'>{$task_obj->name}</td>";
-								echo "<td class='align-middle'>{$task_obj->command}</td>";
-								echo "<td class='align-middle'>{$schedules_tag}</td>";
-								echo "<td class='align-middle'><button type='button' class='btn btn-success add' value={$post->ID} data-bs-target='#additional_schedule' data-bs-toggle='modal'>追加</button></td>";
-								echo "<td class='align-middle'><form action='' method='post'><button type='submit' class='btn btn-danger' name='delete_task' value={$post->ID}>削除</button></form></td>";
+								echo '<td class="align-middle">' . esc_html( $task_obj->name ) . '</td>';
+								echo '<td class="align-middle">' . esc_html( $task_obj->command ) . '</td>';
+								echo '<td class="align-middle">' . esc_html( $schedules_tag ) . '</td>';
+								echo '<td class="align-middle"><button type="button" class="btn btn-success add" value=' . esc_attr( $post->ID ) . 'data-bs-target="#additional_schedule" data-bs-toggle="modal">追加</button></td>';
+								echo '<td class="align-middle"><form action="" method="post"><button type="submit" class="btn btn-danger" name="delete_task" value=' . esc_attr( $post->ID ) . '>削除</button></form></td>';
 								echo '</tr>';
 							}
 						}
@@ -509,7 +509,7 @@
 					'next_text' => __('>'),
 					'total' => $max_pages,
 				);
-				echo paginate_links( $pagination_args );
+				echo esc_url( paginate_links( $pagination_args ) );
 			?>
 		</div>
 	</div>	
