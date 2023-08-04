@@ -59,9 +59,9 @@
 									}
 								}
 								echo '<tr>';
-								echo "<td class='align-middle'>{$result_obj->name}</td>";	
-								echo "<td class='align-middle'>{$result_obj->start}</td>";	
-								echo "<td class='align-middle'>{$result_obj->end}</td>";	
+								echo '<td class="align-middle">' . esc_html( $result_obj->name ) . '</td>';
+								echo '<td class="align-middle">' . esc_html( $result_obj->start ) . '</td>';
+								echo '<td class="align-middle">' . esc_html( $result_obj->end ) . '</td>';
 								if ( $result_obj->status ) {
 									echo '<td class="align-middle" style="color: green;">〇</td>';
 								} else {
@@ -86,7 +86,7 @@
 					'next_text' => __('>'),
 					'total' => $max_pages,
 				);
-				echo paginate_links( $pagination_args );
+				echo esc_url( paginate_links( $pagination_args ) );
 			?>
 		</div>
 	</div>
