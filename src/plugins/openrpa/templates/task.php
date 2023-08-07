@@ -57,13 +57,13 @@
 	function ps_openrpa_add_schedule( $post_id ) {
 		$postmeta_id = 0;
 		$schedule    = esc_html( $_POST['schedule'] ?? '' );
-		$delta       = {
-			'month'  => esc_html( $_POST['month'] ) ?? 0,
-			'week'   => esc_html( $_POST['week'] ) ?? 0,
-			'day'    => esc_html( $_POST['day'] ) ?? 0,
-			'hour'   => esc_html( $_POST['hour'] ) ?? 0,
-			'minute' => esc_html( $_POST['minute'] ) ?? 0,
-		}
+	$delta       = array(
+		'month'  => esc_html( $_POST['month'] ?? 0 ),
+		'week'   => esc_html( $_POST['week'] ?? 0 ),
+		'day'    => esc_html( $_POST['day'] ?? 0 ),
+		'hour'   => esc_html( $_POST['hour'] ?? 0 ),
+		'minute' => esc_html( $_POST['minute'] ?? 0 ),
+	);
 
 		switch( $schedule ) {
 			case 'minute':
