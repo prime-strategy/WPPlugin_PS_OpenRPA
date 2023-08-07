@@ -26,10 +26,10 @@ class PS_OpenRPA_Admin {
 	 * @access public
 	 */
 	public function enqueue() {
-		wp_enqueue_script( 'jquery-js', plugins_url( 'openrpa/assets/js/lib/bootstrap@5.0.2.js' ), array(), '5.0.2' );
-		wp_enqueue_style( 'jquery-css', plugins_url( 'openrpa/assets/css/lib/bootstrap@5.0.2.css' ), array(), '5.0.2' );
-		wp_enqueue_script( 'lightbox-js', plugins_url( 'openrpa/assets/js/lib/lightbox@2.11.4.js' ), array(), '2.11.4' );
-		wp_enqueue_style( 'lightbox-css', plugins_url( 'openrpa/assets/css/lib/lightbox@2.11.4.css' ), array(), '2.11.4' );
+		wp_enqueue_script( 'jquery-js', plugins_url( 'openrpa/assets/js/lib/bootstrap.min.js' ), array(), '5.3.0' );
+		wp_enqueue_style( 'jquery-css', plugins_url( 'openrpa/assets/css/lib/bootstrap.min.css' ), array(), '5.3.0' );
+		wp_enqueue_script( 'lightbox-js', plugins_url( 'openrpa/assets/js/lib/lightbox.js' ), array(), '2.11.4' );
+		wp_enqueue_style( 'lightbox-css', plugins_url( 'openrpa/assets/css/lib/lightbox.css' ), array(), '2.11.4' );
 		wp_enqueue_style( 'ps-openrpa-css', plugins_url( 'openrpa/assets/css/ps-openrpa-admin.css' ), array(), '1.0.0' );
 		wp_enqueue_script( 'ps-openrpa-js', plugins_url( 'openrpa/assets/js/ps-opanrpa-admin.js' ), array(), '1.0.0' );
 	}
