@@ -2,7 +2,7 @@
 /**
  * PS OpenRPA setup.
  *
- */ 
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit();
@@ -14,11 +14,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 class PS_OpenRPA {
 	/**
 	 * PS OpenRPA Version
-	 * 
+	 *
 	 * @var string
 	 */
 	private $version = '1.0.0';
-	
+
 	/**
 	 * Class Constructor
 	 */
@@ -43,7 +43,7 @@ class PS_OpenRPA {
 	 *
 	 * @access private
 	 *
-	 * @param string $name  Constant Name
+	 * @param string $name Constant Name
 	 * @param string $value Constant Value
 	 */
 	private function define( $name, $value ) {
@@ -79,4 +79,3 @@ class PS_OpenRPA {
 }
 
 new PS_OpenRPA();
-

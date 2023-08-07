@@ -32,7 +32,7 @@ class PS_OpenRPA_API {
 	 * @var string
 	 */
 	private $API_ENDPOINT_PREFIX_NAME = 'openrpa';
-	
+
 	/**
 	 * PS OpenRPA Method Variable
 	 *
@@ -52,9 +52,9 @@ class PS_OpenRPA_API {
 	 */
 	public function __construct() {
 		$this->Method = new PS_OpenRPA_API_Method();
-		$this->Error = new PS_OpenRPA_API_Error();
+		$this->Error  = new PS_OpenRPA_API_Error();
 		$this->define_constants();
-		add_action( 'rest_api_init', array( $this, 'enqueue_endpoint' ) );				
+		add_action( 'rest_api_init', array( $this, 'enqueue_endpoint' ) );
 	}
 
 	/**
@@ -71,8 +71,8 @@ class PS_OpenRPA_API {
 	 * Define Constants Only If Not Set
 	 *
 	 * @access private
-	 * 
-	 * @param string $name  Constant Name
+	 *
+	 * @param string $name Constant Name
 	 * @param string|bool $value Constant Value
 	 */
 	private function define( $name, $value ) {
@@ -92,22 +92,22 @@ class PS_OpenRPA_API {
 			PS_OPENRPA_API_ENDPOINT,
 			'/login',
 			array(
-				'methods' => 'GET',
+				'methods'  => 'GET',
 				'callback' => array( $this, 'login' ),
 			),
 		);
-		
+
 		// User Task GET POST EndPoint => GET, POST
 		register_rest_route(
 			PS_OPENRPA_API_ENDPOINT,
 			'/user/(?P<UserId>[\d]+)/task',
 			array(
-				'methods' => array( 'GET', 'POST' ),
+				'methods'  => array( 'GET', 'POST' ),
 				'callback' => array( $this, 'task_router' ),
 				//'permission_callback' => array( $this, 'rest_permission' ),
 			),
 		);
-		
+
 		// User Task PUT DELETE EndPoint => PUT, POST
 		/*
 		register_rest_route(
@@ -125,7 +125,7 @@ class PS_OpenRPA_API {
 			PS_OPENRPA_API_ENDPOINT,
 			'/task/(?P<UserId>[\d]+)',
 			array(
-				'methods' => array( 'GET', 'POST' ),
+				'methods'  => array( 'GET', 'POST' ),
 				'callback' => array( $this, 'complete_router' ),
 				//'permission_callback' => array( $this, 'rest_permission' ),
 			)
@@ -146,33 +146,33 @@ class PS_OpenRPA_API {
 	 *
 	 * @access public
 	 *
-	 * @param string $username        In Header
-	 * @param string $application_key  In Header
-	 * 
+	 * @param string $username In Header
+	 * @param string $application_key In Header
+	 *
 	 * @return object $userId,$token|$message Json Or Failed Message
 	 */
 	public function login( $request ) {
 		$method = $this->Method->get_request_method();
-	
+
 		// method is not GET ... Maybe Unneeded
 		if ( $method !== 'GET' ) {
 			return $this->Error->Error_405();
 		}
-		
+
 		// username and application key are not in header
 		if ( ! $this->Method->check_header( array( 'USERNAME', 'APPLICATIONKEY' ) ) ) {
 			return $this->Error->Error_400();
 		}
-		
+
 		// if user not found
 		if ( ! $this->Method->check_user_and_key() ) {
 			return $this->Error->Error_404();
 		}
-		
+
 		$user_obj = get_user_by( 'login', esc_html( $_SERVER['HTTP_USERNAME'] ?? '' ) );
-		$user_id = $user_obj->ID;
-		$token = $this->Method->create_token( $user_id );
-		
+		$user_id  = $user_obj->ID;
+		$token    = $this->Method->create_token( $user_id );
+
 		return array( 'userId' => $user_id, 'token' => $token );
 	}
 
@@ -181,14 +181,14 @@ class PS_OpenRPA_API {
 	 *
 	 * @access public
 	 *
-	 * @param object  $request 
-	 * -- @param string  $token  In Header --
+	 * @param object $request
+	 * -- @param string $token In Header --
 	 * -- @param string $userId In Path   --
 	 *
 	 * @return array $message Success Or Failed Message
 	 */
 	public function task_router( $request ) {
-		$method = $this->Method->get_request_method();
+		$method  = $this->Method->get_request_method();
 		$user_id = $request['UserId'];
 
 		// method is not GET or POST ... Maybe Unneeded
@@ -201,12 +201,12 @@ class PS_OpenRPA_API {
 		if ( ! $token ) {
 			return $this->Error->Error_400();
 		}
-		
+
 		// check token is correct or not expired
 		if ( ! $this->Method->check_token( $token, $user_id ) ) {
 			return $this->Error->Error_401();
 		}
-		
+
 		// do process, switching by method
 		switch ( $method ) {
 			case 'GET':
@@ -225,19 +225,19 @@ class PS_OpenRPA_API {
 	 * For Update User Task
 	 *
 	 * @access public
-	 * 
-	 * @param object  $request
-	 * -- @param string  $token  In Header --
+	 *
+	 * @param object $request
+	 * -- @param string $token In Header --
 	 * -- @param string $userId In Path   --
 	 * -- @param string $taskId In Path   --
 	 *
 	 * @return array $message Success Or Failed Message
 	 */
 	public function modify_router( $request ) {
-		$method = $this->Method->get_request_method();
+		$method  = $this->Method->get_request_method();
 		$user_id = $request['UserId'];
 		$task_id = $request['TaskId'];
-		
+
 		// method is not PUT or DELETE ... Maybe Unneeded
 		if ( $method !== 'PUT' && $method !== 'DELETE' ) {
 			return $this->Error->Error_405();
@@ -253,7 +253,7 @@ class PS_OpenRPA_API {
 		if ( ! $this->Method->check_token( $token, $user_id ) ) {
 			return $this->Error->Error_401();
 		}
-		
+
 		// do process, switching by method
 		switch ( $method ) {
 			case 'PUT':
@@ -271,17 +271,17 @@ class PS_OpenRPA_API {
 	 * For Completed Task
 	 *
 	 * @access public
-	 * 
-	 * @param object  $request
-	 * -- @param string  $token  In Header --
+	 *
+	 * @param object $request
+	 * -- @param string $token In Header --
 	 * -- @param string $userId In Path   --
 	 *
 	 * @return array $message Success Or Failed Message
 	 */
-	public function complete_router( $request ) {	
-		$method = $this->Method->get_request_method();
+	public function complete_router( $request ) {
+		$method  = $this->Method->get_request_method();
 		$user_id = $request['UserId'];
-		
+
 		// method is not GET or POST ... Maybe Unneeded
 		if ( $method !== 'GET' && $method !== 'POST' ) {
 			return $this->Error->Error_405();
@@ -289,7 +289,7 @@ class PS_OpenRPA_API {
 
 		// get token
 		$token = $this->Method->get_token_in_header();
-		
+
 		if ( ! $token ) {
 			return $this->Error->Error_400();
 		}
@@ -303,7 +303,7 @@ class PS_OpenRPA_API {
 		switch ( $method ) {
 			case 'GET':
 				return $this->Method->get_complete_task( $user_id );
-				break; 
+				break;
 			case 'POST':
 				return $this->Method->add_complete_task( $user_id );
 				break;
