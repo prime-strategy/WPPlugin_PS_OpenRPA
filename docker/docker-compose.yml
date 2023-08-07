@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  wp:
+    container_name: wordpress
+    build: ./
+    restart: always
+    working_dir: /var/www/html
+    ports:
+      - '8080:80'
+    depends_on:
+      - db
+    volumes:
+      - wordpress_data:/var/www/html
+      - ../src/plugins/openrpa:/var/www/html/wp-content/plugins/ps_openrpa
+    environment:
+      TZ: 'Asia/Tokyo'
+      WORDPRESS_DB_HOST: 'db:3306'
+      WORDPRESS_DB_USER: 'wordpress'
+      WORDPRESS_DB_PASSWORD: 'wordpress'
+      WORDPRESS_DB_NAME: 'wordpress'
+      WORDPRESS_DEBUG: 1
+
+  db:
+    container_name: mysql
+    image: mysql:8.0.27
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_DATABASE: 'wordpress'
+      MYSQL_ROOT_PASSWORD: 'wordpress'
+      MYSQL_USER: 'wordpress'
+      MYSQL_PASSWORD: 'wordpress'
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.1.1
+    container_name: phpmyadmin
+    ports:
+      - 8000:80
+    volumes:
+      - ./phpmyadmin/sessions:/sessions
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=db
+      - PMA_USER=root
+      - PMA_PASSWORD=wordpress
+    depends_on:
+      - db
+
+volumes:
+  mysql_data:
+  wordpress_data:

@@ -33,7 +33,12 @@
 				</thead>
 				<tbody>
 					<?php
-						$paged = ( isset( $_GET['paged'] ) ) ? $_GET['paged'] : 1;
+						$paged = esc_html( $_GET['paged'] ?? 1 );
+
+						if ( ! is_int( $paged ) || $paged <= 0 ) {
+							$paged = 1;
+						}
+
 						$args = array(
 							'author' => $user->ID,
 							'post_type' => 'result',
@@ -59,9 +64,9 @@
 									}
 								}
 								echo '<tr>';
-								echo "<td class='align-middle'>{$result_obj->name}</td>";	
-								echo "<td class='align-middle'>{$result_obj->start}</td>";	
-								echo "<td class='align-middle'>{$result_obj->end}</td>";	
+								echo '<td class="align-middle">' . esc_html( $result_obj->name ) . '</td>';
+								echo '<td class="align-middle">' . esc_html( $result_obj->start ) . '</td>';
+								echo '<td class="align-middle">' . esc_html( $result_obj->end ) . '</td>';
 								if ( $result_obj->status ) {
 									echo '<td class="align-middle" style="color: green;">〇</td>';
 								} else {
@@ -86,7 +91,7 @@
 					'next_text' => __('>'),
 					'total' => $max_pages,
 				);
-				echo paginate_links( $pagination_args );
+				echo esc_url( paginate_links( $pagination_args ) );
 			?>
 		</div>
 	</div>

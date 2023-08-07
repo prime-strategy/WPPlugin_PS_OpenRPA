@@ -46,7 +46,7 @@ class PS_OpenRPA_API_Method {
 	 * @return string $method Request Method
 	 */
 	public function get_request_method() {
-		return $_SERVER['REQUEST_METHOD'];
+		return esc_html( $_SERVER['REQUEST_METHOD'] ?? '' );
 	}
 	
 	/**
@@ -133,7 +133,7 @@ class PS_OpenRPA_API_Method {
 	 * @return boolean|string $token if not set return false
 	 */
 	public function get_token_in_header() {
-		$token = $_SERVER['HTTP_TOKEN'];
+		$token = esc_html( $_SERVER['HTTP_TOKEN'] ?? '' );
 		if ( is_null( $token ) ) {
 			return false;
 		}
@@ -148,8 +148,8 @@ class PS_OpenRPA_API_Method {
      * @return boolean
      */
     public function check_user_and_key() {
-    	$username = $_SERVER[ 'HTTP_USERNAME' ];
-		$key = $_SERVER[ 'HTTP_APPLICATIONKEY' ];
+    	$username = esc_html( $_SERVER[ 'HTTP_USERNAME' ] ?? '' );
+		$key      = esc_html( $_SERVER[ 'HTTP_APPLICATIONKEY' ] ?? '' );
 		
 		// remove space
         $key = str_replace( ' ', '', $key );
@@ -334,7 +334,7 @@ class PS_OpenRPA_API_Method {
 	public function get_user_task( $user_id ) {
 		$response = array();
 		
-		date_default_timezone_set('Asia/Tokyo');
+		date_default_timezone_set( get_option( 'timezone_string' ) );
 		$now = new DateTime();
 		$now = $now->format('Y-m-d H:i:s');
 		$args = array(
@@ -473,25 +473,18 @@ class PS_OpenRPA_API_Method {
 	 * @return array
 	 */
 	public function add_complete_task( $user_id ) {
-		$_POST = json_decode( file_get_contents( 'php://input' ), true );
-		$now = date( 'Ymd_His' );
+		$json = file_get_contents( 'php://input' );
+		$arr  = json_decode( $json, true );
+		$now  = date( 'Ymd_His' );
 
-		$task_id = $_POST['id'];
-		$name = $_POST['name'];
-		$command = $_POST['command'];
-		$start = $_POST['start'];
-		$end = $_POST['end'];
-		$next = $_POST['next'];
-		$status = $_POST['status'];
-		
 		$data = array(
-			'id' => $task_id,
-			'name' => $name,
-			'command' => $command,
-			'start' => $start,
-			'end' => $end,
-			'next' => $next,
-			'status' => $status
+			'id'      => $arr[ 'id' ] ?? 0,
+			'name'    => $arr[ 'name' ] ?? '',
+			'command' => $arr[ 'command' ] ?? '',
+			'start'   => $arr[ 'start' ] ?? '',
+			'end'     => $arr[ 'end' ] ?? '',
+			'next'    => $arr[ 'next' ] ?? '',
+			'status'  => $arr[ 'status' ] ?? ''
 		);
 
 		$post_array = array(
