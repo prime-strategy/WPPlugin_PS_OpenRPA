@@ -56,14 +56,23 @@
 	// スケジュール登録
 	function add_schedule( $post_id ) {
 		$postmeta_id = 0;
-		switch( $_POST['schedule'] ) {
+		$schedule    = esc_html( $_POST['schedule'] ?? '' );
+		$delta       = {
+			'month'  => esc_html( $_POST['month'] ) ?? 0,
+			'week'   => esc_html( $_POST['week'] ) ?? 0,
+			'day'    => esc_html( $_POST['day'] ) ?? 0,
+			'hour'   => esc_html( $_POST['hour'] ) ?? 0,
+			'minute' => esc_html( $_POST['minute'] ) ?? 0,
+		}
+
+		switch( $schedule ) {
 			case 'minute':
 				$postmeta_id = add_post_meta(
 					$post_id,
 					SCHEDULE_KEY,
 					array(
-						'format' => "PT{$_POST['minute']}M",
-						'description' => "{$_POST['minute']}分ごとに開始"
+						'format'      => "PT{$delta['minute']}M",
+						'description' => "{$delta['minute']}分ごとに開始"
 					)
 			   	);
 				break;
@@ -72,8 +81,8 @@
 					$post_id,
 					SCHEDULE_KEY,
 					array(
-						'format' => "PT{$_POST['hour']}H{$_POST['minute']}M",
-						'description' => "{$_POST['hour']}時間ごと{$_POST['minute']}分に開始"
+						'format'      => "PT{$delta['hour']}H{$delta['minute']}M",
+						'description' => "{$delta['hour']}時間ごと{$delta['minute']}分に開始"
 					)
 				);
 				break;
@@ -82,8 +91,8 @@
 					$post_id,
 					SCHEDULE_KEY,
 					array(
-						'format' => "P1DT{$_POST['hour']}H{$_POST['minute']}M",
-						'description' => "毎日{$_POST['hour']}時{$_POST['minute']}分に開始"
+						'format'      => "P1DT{$delta['hour']}H{$delta['minute']}M",
+						'description' => "毎日{$delta['hour']}時{$delta['minute']}分に開始"
 					)
 				);
 				break;
@@ -93,8 +102,8 @@
 					$post_id,
 					SCHEDULE_KEY,
 					array(
-						'format' => "P{$dotw['calc']}WT{$_POST['hour']}H{$_POST['minute']}M",
-						'description' => "毎週{$dotw['description']}曜日{$_POST['hour']}時および{$_POST['minute']}分に開始"
+						'format'      => "P{$dotw['calc']}WT{$delta['hour']}H{$delta['minute']}M",
+						'description' => "毎週{$dotw['description']}曜日{$delta['hour']}時および{$delta['minute']}分に開始"
 					)
 				);
 				break;
@@ -104,8 +113,8 @@
 					$post_id,
 					SCHEDULE_KEY,
 					array(
-						'format' => "P{$_POST['month']}M{$dotw['calc']}WT{$_POST['hour']}H{$_POST['minute']}M",
-						'description' => "{$_POST['month']}カ月ごと毎週{$dotw['description']}曜日および{$_POST['hour']}時{$_POST['minute']}分に開始"
+						'format'      => "P{$delta['month']}M{$dotw['calc']}WT{$delta['hour']}H{$delta['minute']}M",
+						'description' => "{$delta['month']}カ月ごと毎週{$dotw['description']}曜日および{$delta['hour']}時{$delta['minute']}分に開始"
 					)
 				);
 				break;
@@ -121,64 +130,22 @@
 
 	// 実行曜日の加算
 	function calc_dotw() {
-		$dotw = 0;
-		$dotw_desc = '';
-		if ( array_key_exists( 'monday', $_POST ) ) {
-			$dotw += $_POST['monday'];
-			if ( '' === $dotw_desc ) {
-				$dotw_desc .= '月';
-			} else {
-				$dotw_desc .= ',月';
-			}
-		}
-		if ( array_key_exists( 'tuesday', $_POST ) ) {
-			$dotw += $_POST['tuesday'];
-			if ( '' === $dotw_desc ) {
-				$dotw_desc .= '火';
-			} else {
-				$dotw_desc .= ',火';
-			}
-		}
-		if ( array_key_exists( 'wednesday', $_POST ) ) {
-			$dotw += $_POST['wednesday'];
-			if ( '' === $dotw_desc ) {
-				$dotw_desc .= '水';
-			} else {
-				$dotw_desc .= ',水';
-			}	
-		}
-		if ( array_key_exists( 'thursday', $_POST ) ) {
-			$dotw += $_POST['thursday'];
-			if ( '' === $dotw_desc ) {
-				$dotw_desc .= '木';
-			} else {
-				$dotw_desc .= ',木';
-			}
-		}
-		if ( array_key_exists( 'friday', $_POST ) ) {
-			$dotw += $_POST['friday'];
-			if ( '' === $dotw_desc ) {
-				$dotw_desc .= '金';
-			} else {
-				$dotw_desc .= ',金';
-			}
-		}
-		if ( array_key_exists( 'saturday', $_POST ) ) {
-			$dotw += $_POST['saturday'];
-			if ( '' === $dotw_desc ) {
-				$dotw_desc .= '土';
-			} else {
-				$dotw_desc .= ',土';
-			}
-		}
-		if ( array_key_exists( 'sunday', $_POST ) ) {
-			$dotw += $_POST['sunday'];
-			if ( '' === $dotw_desc ) {
-				$dotw_desc .= '日';
-			} else {
-				$dotw_desc .= ',日';
-			}	
-		}
+		$week = array(
+			'monday'    => '月',
+			'tuesday'   => '火',
+			'wednesday' => '水',
+			'thursday'  => '木',
+			'friday'    => '金',
+			'saturday'  => '土',
+			'sunday'    => '日',
+		);
+
+		$weekdays = array_intersect_key( $_POST, $week );
+		$dotw = array_sum( $weekdays );
+
+		$weekdays_j = array_intersect_key( $week, $_POST );
+		$dotw_desc = implode( ',', $weekdays_j ) ?? '';
+
 		return array( 'calc' => $dotw, 'description' => $dotw_desc );
 	}
 
@@ -229,8 +196,8 @@
 		// タスク登録POSTの場合
 		if ( array_key_exists( 'command', $_POST ) && array_key_exists( 'schedule', $_POST ) ) {
 			if ( ! error_check() ) {
-				$command = $_POST['command'];
-				$task_name = $_POST['task_name'];
+				$command   = esc_html( $_POST['command'] ?? '' );
+				$task_name = esc_html( $_POST['task_name'] ?? '' );
 				$post_id = add_task( $user->ID, $now, $task_name, $command );
 				if ( $post_id ) {
 					$postmeta_id = add_schedule( $post_id );
@@ -240,7 +207,12 @@
 		
 		// タスク削除POSTの場合
 		if ( array_key_exists( 'delete_task', $_POST ) ) {
-			$post_id = $_POST['delete_task'];
+			$post_id = esc_html( $_POST['delete_task'] ?? 0 );
+
+			if ( ! is_int( $post_id ) || $post_id <= 0 ) {
+				echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="削除するタスク ID が不正です。<br>";});</script>';
+			}
+
 			$args = array(
 				'ID' => $post_id,
 				'post_status' => 'draft'
@@ -250,7 +222,7 @@
 
 		// スケジュール削除POSTの場合
 		if ( array_key_exists( 'delete_schedule', $_POST ) ) {
-			$data = $_POST['delete_schedule'];
+			$data = esc_html( $_POST['delete_schedule'] ?? '' );
 			// javascript用のjsonになっているのでPHPで扱えるようにする
 			$data = str_replace( '\\\\', '\\', $data );
 			$data = str_replace( '\\"', '"', $data );
@@ -268,7 +240,7 @@
 
 		// スケジュール追加POSTの場合
 		if ( array_key_exists( 'additional_schedule', $_POST ) ) {
-			$post_id = $_POST['additional_schedule'];
+			$post_id = esc_html( $_POST['additional_schedule'] ?? '' );
 			if ( ! error_check() ) {
 				$postmeta_id = add_schedule( $post_id );
 			}
@@ -456,7 +428,12 @@
 				</thead>
 				<tbody>
 					<?php
-						$paged = ( isset( $_GET['paged'] ) ) ? $_GET['paged'] : 1;
+						$paged = esc_html( $_GET['paged'] ?? 1 );
+
+						if ( ! is_int( $paged ) || $paged <= 0 ) {
+							$paged = 1;
+						}
+
 						$args = array(
 							'author' => $user->ID,
 							'post_type' => 'task',

@@ -33,7 +33,12 @@
 				</thead>
 				<tbody>
 					<?php
-						$paged = ( isset( $_GET['paged'] ) ) ? $_GET['paged'] : 1;
+						$paged = esc_html( $_GET['paged'] ?? 1 );
+
+						if ( ! is_int( $paged ) || $paged <= 0 ) {
+							$paged = 1;
+						}
+
 						$args = array(
 							'author' => $user->ID,
 							'post_type' => 'result',
