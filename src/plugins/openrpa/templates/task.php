@@ -3,14 +3,14 @@
 		exit();
 	}
 
-	if ( ! defined( 'SCHEDULE_KEY' ) ) {
-		define( 'SCHEDULE_KEY', '_schedule_time' );
+	if ( ! defined( 'PS_OPENRPA_SCHEDULE_KEY' ) ) {
+		define( 'PS_OPENRPA_SCHEDULE_KEY', '_schedule_time' );
 	}
 ?>
 
 <?php
 	// タスク名重複確認
-	function check_taskname( $name ) {
+	function ps_openrpa_check_taskname( $name ) {
 
 		$args = array(
 			'author' => $user->ID,
@@ -29,9 +29,9 @@
 	}
 
 	// タスク登録
-	function add_task( $user_id, $now, $task_name, $command ) {
+	function ps_openrpa_add_task( $user_id, $now, $task_name, $command ) {
 		// 同じタスク名では登録できないよう
-		if ( false === check_taskname( $task_name ) ) {
+		if ( false === ps_openrpa_check_taskname( $task_name ) ) {
 			echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※タスク名はユニークでなければいけません<br>";});</script>';
 			return false;
 		} else {
@@ -54,13 +54,13 @@
 	}
 	
 	// スケジュール登録
-	function add_schedule( $post_id ) {
+	function ps_openrpa_add_schedule( $post_id ) {
 		$postmeta_id = 0;
 		switch( $_POST['schedule'] ) {
 			case 'minute':
 				$postmeta_id = add_post_meta(
 					$post_id,
-					SCHEDULE_KEY,
+					PS_OPENRPA_SCHEDULE_KEY,
 					array(
 						'format' => "PT{$_POST['minute']}M",
 						'description' => "{$_POST['minute']}分ごとに開始"
@@ -70,7 +70,7 @@
 			case 'hour':
 				$postmeta_id = add_post_meta(
 					$post_id,
-					SCHEDULE_KEY,
+					PS_OPENRPA_SCHEDULE_KEY,
 					array(
 						'format' => "PT{$_POST['hour']}H{$_POST['minute']}M",
 						'description' => "{$_POST['hour']}時間ごと{$_POST['minute']}分に開始"
@@ -80,7 +80,7 @@
 			case 'day':
 				$postmeta_id = add_post_meta( 
 					$post_id,
-					SCHEDULE_KEY,
+					PS_OPENRPA_SCHEDULE_KEY,
 					array(
 						'format' => "P1DT{$_POST['hour']}H{$_POST['minute']}M",
 						'description' => "毎日{$_POST['hour']}時{$_POST['minute']}分に開始"
@@ -88,10 +88,10 @@
 				);
 				break;
 			case 'week':
-				$dotw = calc_dotw();
+				$dotw = ps_openrpa_calc_dotw();
 				$postmeta_id = add_post_meta(
 					$post_id,
-					SCHEDULE_KEY,
+					PS_OPENRPA_SCHEDULE_KEY,
 					array(
 						'format' => "P{$dotw['calc']}WT{$_POST['hour']}H{$_POST['minute']}M",
 						'description' => "毎週{$dotw['description']}曜日{$_POST['hour']}時および{$_POST['minute']}分に開始"
@@ -99,10 +99,10 @@
 				);
 				break;
 			case 'month':
-				$dotw = calc_dotw();
+				$dotw = ps_openrpa_calc_dotw();
 				$postmeta_id = add_post_meta(
 					$post_id,
-					SCHEDULE_KEY,
+					PS_OPENRPA_SCHEDULE_KEY,
 					array(
 						'format' => "P{$_POST['month']}M{$dotw['calc']}WT{$_POST['hour']}H{$_POST['minute']}M",
 						'description' => "{$_POST['month']}カ月ごと毎週{$dotw['description']}曜日および{$_POST['hour']}時{$_POST['minute']}分に開始"
@@ -120,7 +120,7 @@
 
 
 	// 実行曜日の加算
-	function calc_dotw() {
+	function ps_openrpa_calc_dotw() {
 		$dotw = 0;
 		$dotw_desc = '';
 		if ( array_key_exists( 'monday', $_POST ) ) {
@@ -183,7 +183,7 @@
 	}
 
 	// 入力エラーチェック
-	function error_check() {
+	function ps_openrpa_error_check() {
 		// エラーフラグ
 		$error = false;
 		// task_nameが空の場合エラー
@@ -228,12 +228,12 @@
 	if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 		// タスク登録POSTの場合
 		if ( array_key_exists( 'command', $_POST ) && array_key_exists( 'schedule', $_POST ) ) {
-			if ( ! error_check() ) {
+			if ( ! ps_openrpa_error_check() ) {
 				$command = $_POST['command'];
 				$task_name = $_POST['task_name'];
-				$post_id = add_task( $user->ID, $now, $task_name, $command );
+				$post_id = ps_openrpa_add_task( $user->ID, $now, $task_name, $command );
 				if ( $post_id ) {
-					$postmeta_id = add_schedule( $post_id );
+					$postmeta_id = ps_openrpa_add_schedule( $post_id );
 				}
 			}
 		}
@@ -261,7 +261,7 @@
 			
 			$resp = delete_post_meta(
 				$post_id,
-				SCHEDULE_KEY,
+				PS_OPENRPA_SCHEDULE_KEY,
 				$meta_value
 			);
 		}
@@ -269,8 +269,8 @@
 		// スケジュール追加POSTの場合
 		if ( array_key_exists( 'additional_schedule', $_POST ) ) {
 			$post_id = $_POST['additional_schedule'];
-			if ( ! error_check() ) {
-				$postmeta_id = add_schedule( $post_id );
+			if ( ! ps_openrpa_error_check() ) {
+				$postmeta_id = ps_openrpa_add_schedule( $post_id );
 			}
 		}
 	}
@@ -472,7 +472,7 @@
 						if ( $query->have_posts() ) {
 							foreach( $query->posts as $key => $post ) {
 								$task_obj = json_decode( $post->post_content );
-								$schedules = get_post_meta( $post->ID, SCHEDULE_KEY );
+								$schedules = get_post_meta( $post->ID, PS_OPENRPA_SCHEDULE_KEY );
 								$schedules_tag = '';
 								foreach( $schedules as $schedule ) {
 									// meta削除に必要なデータはjson化

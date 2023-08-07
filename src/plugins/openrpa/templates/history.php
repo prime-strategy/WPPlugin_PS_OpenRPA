@@ -3,8 +3,8 @@
 		exit();
 	}
 	
-	if ( ! defined( 'SCHEDULE_KEY' ) ) {
-		define( 'SCHEDULE_KEY', '_schedule_time' );
+	if ( ! defined( 'PS_OPENRPA_SCHEDULE_KEY' ) ) {
+		define( 'PS_OPENRPA_SCHEDULE_KEY', '_schedule_time' );
 	}
 ?>
 
@@ -49,7 +49,7 @@
 							foreach( $query->posts as $key => $post ) {
 								$result_obj = json_decode( $post->post_content );
 								$task_id = $result_obj->id;
-								$schedules = get_post_meta( $task_id, SCHEDULE_KEY );
+								$schedules = get_post_meta( $task_id, PS_OPENRPA_SCHEDULE_KEY );
 								$schedules_tag = '';
 								foreach( $schedules as $schedule ) {
 									if ( '' === $schedules_tag ) {
