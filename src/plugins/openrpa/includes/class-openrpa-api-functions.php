@@ -14,7 +14,7 @@ if ( ! class_exists( 'PS_OpenRPA_API_Error' ) ) {
 /**
  * PS OpenRPA API Method Class
  *
- * Using From PS_OpenRPA_API Class 
+ * Using From PS_OpenRPA_API Class
  */
 class PS_OpenRPA_API_Method {
 	/**
@@ -23,7 +23,7 @@ class PS_OpenRPA_API_Method {
 	 * @var string
 	 */
 	private $base_token_path = '/tmp';
-	
+
 	/**
 	 * End Name Of Token File
 	 *
@@ -37,7 +37,7 @@ class PS_OpenRPA_API_Method {
 	 * @var intger
 	 */
 	private $minute_span = 5;
-	
+
 	/**
 	 * Get Request Method
 	 *
@@ -48,7 +48,7 @@ class PS_OpenRPA_API_Method {
 	public function get_request_method() {
 		return esc_html( $_SERVER['REQUEST_METHOD'] ?? '' );
 	}
-	
+
 	/**
 	 * Create Token
 	 *
@@ -59,16 +59,16 @@ class PS_OpenRPA_API_Method {
 	 * @return string $token
 	 */
 	public function create_token( $user_id ) {
-		$token = bin2hex( random_bytes(32) );
+		$token      = bin2hex( random_bytes( 32 ) );
 		$token_file = "{$this->base_token_path}/{$token}{$this->token_end_name}";
 
 		// For Token file already exists
 		if ( file_exists( $token_file ) ) {
-			$token = bin2hex( random_bytes(32) );
+			$token      = bin2hex( random_bytes( 32 ) );
 			$token_file = "{$this->base_token_path}/{$token}{$this->token_end_name}";
 			// Duplicate yet
 			while ( file_exists( $token_file ) ) {
-				$token = bin2hex( random_bytes(32) );
+				$token      = bin2hex( random_bytes( 32 ) );
 				$token_file = "{$this->base_token_path}/{$token}{$this->token_end_name}";
 			}
 		}
@@ -76,7 +76,7 @@ class PS_OpenRPA_API_Method {
 		$fp = fopen( $token_file, 'w' );
 		fwrite( $fp, $user_id );
 		fclose( $fp );
-	
+
 		return $token;
 	}
 
@@ -87,7 +87,7 @@ class PS_OpenRPA_API_Method {
 	 *
 	 * @param string $token
 	 * @param string $user_id
-	 * 
+	 *
 	 * @return boolean
 	 */
 	public function check_token( $token, $user_id ) {
@@ -107,22 +107,23 @@ class PS_OpenRPA_API_Method {
 	}
 
 	/**
-     * Check Header Args
-     *
-     * @access public
-     *
-     * @param array $args In Header Args
-     *
-     * @return boolean
-     */
-    public function check_header( $args ) {
-    	foreach ( $args as $arg ) {
-        	$arg = 'HTTP_' . $arg;
-            if ( ! array_key_exists( $arg, $_SERVER ) ) {
-            	return false;
-            }
-       	}
-       	return true;
+	 * Check Header Args
+	 *
+	 * @access public
+	 *
+	 * @param array $args In Header Args
+	 *
+	 * @return boolean
+	 */
+	public function check_header( $args ) {
+		foreach ( $args as $arg ) {
+			$arg = 'HTTP_' . $arg;
+			if ( ! array_key_exists( $arg, $_SERVER ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -137,40 +138,42 @@ class PS_OpenRPA_API_Method {
 		if ( is_null( $token ) ) {
 			return false;
 		}
+
 		return $token;
 	}
 
 	/**
-     * Check Logged In And Application Key
-     *
-     * @access public
-     *
-     * @return boolean
-     */
-    public function check_user_and_key() {
-    	$username = esc_html( $_SERVER[ 'HTTP_USERNAME' ] ?? '' );
-		$key      = esc_html( $_SERVER[ 'HTTP_APPLICATIONKEY' ] ?? '' );
-		
+	 * Check Logged In And Application Key
+	 *
+	 * @access public
+	 *
+	 * @return boolean
+	 */
+	public function check_user_and_key() {
+		$username = esc_html( $_SERVER['HTTP_USERNAME'] ?? '' );
+		$key      = esc_html( $_SERVER['HTTP_APPLICATIONKEY'] ?? '' );
+
 		// remove space
-        $key = str_replace( ' ', '', $key );
+		$key = str_replace( ' ', '', $key );
 
-        // check user exists
-        $user_obj = get_user_by( 'login', $username );
-        if ( $user_obj === false ) {
-        	return false;
-        }
-        $user_id = $user_obj->ID;
+		// check user exists
+		$user_obj = get_user_by( 'login', $username );
+		if ( $user_obj === false ) {
+			return false;
+		}
+		$user_id = $user_obj->ID;
 
-        // check appkey is correct
-        $user_app_keys = WP_Application_Passwords::get_user_application_passwords( $user_id );
-        foreach ( $user_app_keys as $user_app_key ) {
-        	if ( wp_check_password( $key, $user_app_key['password'] ) ) {
-            	return true;
-            }
-       	}
-        return false;
+		// check appkey is correct
+		$user_app_keys = WP_Application_Passwords::get_user_application_passwords( $user_id );
+		foreach ( $user_app_keys as $user_app_key ) {
+			if ( wp_check_password( $key, $user_app_key['password'] ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
-	
+
 	/**
 	 * Parse Day of the Week
 	 * shift left for 7 times
@@ -184,11 +187,12 @@ class PS_OpenRPA_API_Method {
 	private function parse_dotw( $num ) {
 		$week = array( '月', '火', '水', '木', '金', '土', '日' );
 		$dotw = array();
-		for( $i = 0; $i < 7; $i++ ) {
+		for ( $i = 0; $i < 7; $i ++ ) {
 			if ( $num & 1 << $i ) {
 				array_push( $dotw, $week[ $i ] );
 			}
 		}
+
 		return $dotw;
 	}
 
@@ -200,89 +204,94 @@ class PS_OpenRPA_API_Method {
 	 * @param string $format
 	 * @param object $now
 	 * @param string $post_date
-	 * 
+	 *
 	 * @return string | boolean
 	 */
 	private function calc_next_schedule( $format, $now ) {
 		$custom_format = str_replace( 'P', '', $format );
 		$custom_format = explode( 'T', $custom_format );
-		
+
 		// month, week, day
 		$MWD = $custom_format[0];
 		// hour, minute
 		$HM = $custom_format[1];
-		
-		$now = new Datetime( $now );
+
+		$now        = new Datetime( $now );
 		$now_minute = ( int ) $now->format( 'i' );
-		$now_hour = ( int ) $now->format( 'H' );
-		$now_month = ( int ) $now->format( 'm' );
-		
+		$now_hour   = ( int ) $now->format( 'H' );
+		$now_month  = ( int ) $now->format( 'm' );
+
 		$do_time = $now->format( 'Y-m-d' ) . ' ';
 
 		// for hour and minute case, $MWD is empty
 		if ( empty( $MWD ) ) {
 			if ( false !== strpos( $HM, 'H' ) ) {
 				//for hour
-				$HM = explode( 'H', $HM );
-				$hour = ( int ) $HM[0];
+				$HM     = explode( 'H', $HM );
+				$hour   = ( int ) $HM[0];
 				$minute = ( int ) str_replace( 'M', '', $HM[1] );
-				
+
 				if ( 0 !== $now_hour % $hour ) {
 					return false;
 				}
-				
+
 				if ( $now_minute <= $minute && $minute < $now_minute + $this->minute_span ) {
 					$do_time .= "{$now_hour}:{$minute}";
+
 					return $do_time;
 				}
+
 				return false;
 
 			} else {
 				//for minute
 				$minute = ( int ) str_replace( 'M', '', $HM );
 
-				for( $do = $minute; $do <= 60; $do += $minute ) {
-					if( $now_minute < $do ) {
+				for ( $do = $minute; $do <= 60; $do += $minute ) {
+					if ( $now_minute < $do ) {
 						if ( 60 === $do ) {
-							$do = 0;
+							$do       = 0;
 							$now_hour += 1;
 						}
-						$do = sprintf('%02d', $do);
+						$do      = sprintf( '%02d', $do );
 						$do_time .= "{$now_hour}:{$do}";
+
 						return $do_time;
 					}
 				}
+
 				return false;
 			}
 		} else {
 			// for month, week and day case	
-			$HM = explode( 'H', $HM );
-			$hour = ( int ) $HM[0];
+			$HM     = explode( 'H', $HM );
+			$hour   = ( int ) $HM[0];
 			$minute = ( int ) str_replace( 'M', '', $HM[1] );
 
 			$dotw_arr = array( '日', '月', '火', '水', '木', '金', '土' );
 
 			if ( false !== strpos( $MWD, 'M' ) ) {
 				//for month
-				$MW = explode( 'M', $MWD );
+				$MW    = explode( 'M', $MWD );
 				$month = ( int ) $MW[0];
-				$week = ( int ) str_replace( 'W', '', $MW[1] );
+				$week  = ( int ) str_replace( 'W', '', $MW[1] );
 
-				$dotw = $this->parse_dotw( ( int ) $week );
+				$dotw         = $this->parse_dotw( ( int ) $week );
 				$current_dotw = $dotw_arr[ date( 'w' ) ];
-				if ( false === array_search ( $current_dotw, $dotw ) ) {
+				if ( false === array_search( $current_dotw, $dotw ) ) {
 					return false;
 				}
-				
+
 				if ( 0 !== $now_month % $month ) {
 					return false;
 				}
 				if ( $now_hour !== $hour ) {
 					return false;
 				}
-				
+
 				if ( $now_minute <= $minute && $minute < $now_minute + $this->minute_span ) {
-					$do_time .= "{$now_hour}:{$minute}";	
+					$do_time .= "{$now_hour}:{$minute}";
+
 					return $do_time;
 				}
 
@@ -290,10 +299,10 @@ class PS_OpenRPA_API_Method {
 
 			} else if ( false !== strpos( $MWD, 'W' ) ) {
 				//for week
-				$week = str_replace( 'W', '', $MWD );
-				$dotw = $this->parse_dotw( ( int ) $week );
+				$week         = str_replace( 'W', '', $MWD );
+				$dotw         = $this->parse_dotw( ( int ) $week );
 				$current_dotw = $dotw_arr[ date( 'w' ) ];
-				if ( false === array_search ( $current_dotw, $dotw ) ) {
+				if ( false === array_search( $current_dotw, $dotw ) ) {
 					return false;
 				}
 				if ( $now_hour !== $hour ) {
@@ -301,7 +310,8 @@ class PS_OpenRPA_API_Method {
 				}
 
 				if ( $now_minute <= $minute && $minute < $now_minute + $this->minute_span ) {
-					$do_time .= "{$now_hour}:{$minute}";	
+					$do_time .= "{$now_hour}:{$minute}";
+
 					return $do_time;
 				}
 
@@ -311,17 +321,18 @@ class PS_OpenRPA_API_Method {
 				if ( 0 !== $now_hour % $hour ) {
 					return false;
 				}
-				
+
 				if ( $now_minute <= $minute && $minute < $now_minute + $this->minute_span ) {
-					$do_time .= "{$now_hour}:{$minute}";	
+					$do_time .= "{$now_hour}:{$minute}";
+
 					return $do_time;
 				}
-					
+
 				return false;
 			}
 		}
 	}
-	
+
 	/**
 	 * Get User Task
 	 *
@@ -333,44 +344,45 @@ class PS_OpenRPA_API_Method {
 	 */
 	public function get_user_task( $user_id ) {
 		$response = array();
-		
+
 		date_default_timezone_set( get_option( 'timezone_string' ) );
-		$now = new DateTime();
-		$now = $now->format('Y-m-d H:i:s');
-		$args = array(
-			'author' => $user_id,
-			'post_type' => 'task',
-			'post_status' => 'publish',
-			'posts_per_page' => -1
+		$now   = new DateTime();
+		$now   = $now->format( 'Y-m-d H:i:s' );
+		$args  = array(
+			'author'         => $user_id,
+			'post_type'      => 'task',
+			'post_status'    => 'publish',
+			'posts_per_page' => - 1
 		);
 		$posts = get_posts( $args );
-		foreach( $posts as $post ) {
-			$task_obj = json_decode( $post->post_content );
+		foreach ( $posts as $post ) {
+			$task_obj  = json_decode( $post->post_content );
 			$schedules = get_post_meta( $post->ID, '_schedule_time' );
-			
-			$do_times = array();	
-			foreach( $schedules as $schedule ) {
-				$next = $this->calc_next_schedule( $schedule['format'], $now );	
+
+			$do_times = array();
+			foreach ( $schedules as $schedule ) {
+				$next = $this->calc_next_schedule( $schedule['format'], $now );
 				if ( false === $next ) {
 					continue;
 				}
 				array_push( $do_times, $next );
 			}
-			
-			if ( true === empty( $do_times ) ) {	
+
+			if ( true === empty( $do_times ) ) {
 				continue;
 			}
 			$do_times = array_unique( $do_times );
 			array_push(
 				$response,
 				array(
-					'id' => $post->ID,
-					'name' => $task_obj->name,
-					'command' => $task_obj->command,
+					'id'       => $post->ID,
+					'name'     => $task_obj->name,
+					'command'  => $task_obj->command,
 					'schedule' => $do_times
 				)
 			);
 		}
+
 		return $response;
 	}
 
@@ -386,6 +398,7 @@ class PS_OpenRPA_API_Method {
 	public function add_user_task( $user_id ) {
 		// Not yet implemented
 		$error = new PS_OpenRPA_API_Error();
+
 		return $error->Error_503();
 	}
 
@@ -403,6 +416,7 @@ class PS_OpenRPA_API_Method {
 	public function update_user_task( $user_id, $task_id ) {
 		// Not yet implemented
 		$error = new PS_OpenRPA_API_Error();
+
 		return $error->Error_503();
 	}
 
@@ -418,7 +432,7 @@ class PS_OpenRPA_API_Method {
 	 */
 	public function delete_user_task( $user_id, $task_id ) {
 		$args = array(
-			'ID' => $task_id,
+			'ID'          => $task_id,
 			'post_status' => 'draft'
 		);
 		wp_update_post( $args );
@@ -436,30 +450,31 @@ class PS_OpenRPA_API_Method {
 	public function get_complete_task( $user_id ) {
 		$response = array();
 
-		$args = array(
-			'author' => $user_id,
-			'post_type' => 'result',
-			'post_status' => 'publish',
-			'posts_per_page' => -1
+		$args  = array(
+			'author'         => $user_id,
+			'post_type'      => 'result',
+			'post_status'    => 'publish',
+			'posts_per_page' => - 1
 		);
 		$posts = get_posts( $args );
-		foreach( $posts as $post ) {
+		foreach ( $posts as $post ) {
 			$result_obj = json_decode( $post->post_content );
-			$schedules = get_post_meta( $result_obj->id, '_schedule_time' );
+			$schedules  = get_post_meta( $result_obj->id, '_schedule_time' );
 			array_push(
 				$response,
 				array(
-					'id' => $result_obj->id,
-					'name' => $result_obj->name,
-					'command' => $result_obj->command,
-					'start' => $result_obj->start,
-					'end' => $result_obj->end,
-					'next' => $result_obj->next,
-					'status' => $result_obj->status,
+					'id'       => $result_obj->id,
+					'name'     => $result_obj->name,
+					'command'  => $result_obj->command,
+					'start'    => $result_obj->start,
+					'end'      => $result_obj->end,
+					'next'     => $result_obj->next,
+					'status'   => $result_obj->status,
 					'schedule' => $schedules
 				)
 			);
 		}
+
 		return $response;
 	}
 
@@ -478,21 +493,21 @@ class PS_OpenRPA_API_Method {
 		$now  = date( 'Ymd_His' );
 
 		$data = array(
-			'id'      => $arr[ 'id' ] ?? 0,
-			'name'    => $arr[ 'name' ] ?? '',
-			'command' => $arr[ 'command' ] ?? '',
-			'start'   => $arr[ 'start' ] ?? '',
-			'end'     => $arr[ 'end' ] ?? '',
-			'next'    => $arr[ 'next' ] ?? '',
-			'status'  => $arr[ 'status' ] ?? ''
+			'id'      => $arr['id'] ?? 0,
+			'name'    => $arr['name'] ?? '',
+			'command' => $arr['command'] ?? '',
+			'start'   => $arr['start'] ?? '',
+			'end'     => $arr['end'] ?? '',
+			'next'    => $arr['next'] ?? '',
+			'status'  => $arr['status'] ?? ''
 		);
 
 		$post_array = array(
-			'post_title' => $user_id . '_' . $now,
-			'post_type' => 'result',
+			'post_title'   => $user_id . '_' . $now,
+			'post_type'    => 'result',
 			'post_content' => json_encode( $data, JSON_UNESCAPED_UNICODE ),
-			'post_status' => 'publish',
-			'post_author' => $user_id
+			'post_status'  => 'publish',
+			'post_author'  => $user_id
 		);
 
 		$post_id = wp_insert_post( $post_array );

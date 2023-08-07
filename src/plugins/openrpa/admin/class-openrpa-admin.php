@@ -16,7 +16,7 @@ class PS_OpenRPA_Admin {
 	 * Initializes WordPress Hooks
 	 */
 	public function __construct() {
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );	
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 	}
 
