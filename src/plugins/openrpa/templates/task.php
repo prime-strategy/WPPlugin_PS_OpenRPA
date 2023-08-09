@@ -8,13 +8,13 @@ if ( ! defined( 'PS_OPENRPA_SCHEDULE_KEY' ) ) {
 }
 
 // タスク名重複確認
-function ps_openrpa_check_taskname( $name ) {
+function ps_openrpa_check_taskname( $user_id, $name ) {
 
 	$args  = array(
-		'author'         => $user->ID,
+		'author'         => $user_id,
 		'post_type'      => 'task',
 		'post_status'    => 'publish',
-		'posts_per_page' => - 1
+		'posts_per_page' => -1
 	);
 	$posts = get_posts( $args );
 	foreach ( $posts as $key => $post ) {
@@ -30,7 +30,7 @@ function ps_openrpa_check_taskname( $name ) {
 // タスク登録
 function ps_openrpa_add_task( $user_id, $now, $task_name, $command ) {
 	// 同じタスク名では登録できないよう
-	if ( false === ps_openrpa_check_taskname( $task_name ) ) {
+	if ( false === ps_openrpa_check_taskname( $user_id, $task_name ) ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※タスク名はユニークでなければいけません<br>";});</script>';
 
 		return false;
