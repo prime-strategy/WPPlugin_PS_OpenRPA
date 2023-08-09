@@ -287,32 +287,32 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
                     <div class="form-check" style="padding-left: 0;">
                         <input type="radio" class="form-check-input schedule" name="schedule" value="minute" id="minute"
                                style="margin: auto; float: none;" checked>
-                        <label class="form-check-label">分</label>
+                        <label class="form-check-label" for="minute">分</label>
                     </div>
                     <div class="form-check" style="padding-left: 0;">
                         <input type="radio" class="form-check-input schedule" name="schedule" value="hour" id="hour"
                                style="margin: auto; float: none;">
-                        <label class="form-check-label">時間</label>
+                        <label class="form-check-label" for="hour">時間</label>
                     </div>
                     <div class="form-check" style="padding-left: 0;">
                         <input type="radio" class="form-check-input schedule" name="schedule" value="day" id="day"
                                style="margin: auto; float: none;">
-                        <label class="form-check-label">日</label>
+                        <label class="form-check-label" for="day">日</label>
                     </div>
                     <div class="form-check" style="padding-left: 0;">
                         <input type="radio" class="form-check-input schedule" name="schedule" value="week" id="week"
                                style="margin: auto; float: none;">
-                        <label class="form-check-label">週</label>
+                        <label class="form-check-label" for="week">週</label>
                     </div>
                     <div class="form-check" style="padding-left: 0;">
                         <input type="radio" class="form-check-input schedule" name="schedule" value="month" id="month"
                                style="margin: auto; float: none;">
-                        <label class="form-check-label">月</label>
+                        <label class="form-check-label" for="month">月</label>
                     </div>
                     <div class="form-check" style="padding-left: 0;">
                         <input type="radio" class="form-check-input schedule" name="schedule" id="custom"
                                style="margin: auto; float: none;" disabled>
-                        <label class="form-check-label">カスタム</label>
+                        <label class="form-check-label" for="custom">カスタム</label>
                     </div>
                 </div>
 
@@ -361,32 +361,32 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
                             <div class="form-check" style="padding-left: 0;">
                                 <input type="radio" class="form-check-input modal_schedule" name="schedule"
                                        value="minute" id="minute" style="margin: auto; float: none;" checked>
-                                <label class="form-check-label">分</label>
+                                <label class="form-check-label" for="minute">分</label>
                             </div>
                             <div class="form-check" style="padding-left: 0;">
                                 <input type="radio" class="form-check-input modal_schedule" name="schedule" value="hour"
                                        id="hour" style="margin: auto; float: none;">
-                                <label class="form-check-label">時間</label>
+                                <label class="form-check-label" for="hour">時間</label>
                             </div>
                             <div class="form-check" style="padding-left: 0;">
                                 <input type="radio" class="form-check-input modal_schedule" name="schedule" value="day"
                                        id="day" style="margin: auto; float: none;">
-                                <label class="form-check-label">日</label>
+                                <label class="form-check-label" for="day">日</label>
                             </div>
                             <div class="form-check" style="padding-left: 0;">
                                 <input type="radio" class="form-check-input modal_schedule" name="schedule" value="week"
                                        id="week" style="margin: auto; float: none;">
-                                <label class="form-check-label">週</label>
+                                <label class="form-check-label" for="week">週</label>
                             </div>
                             <div class="form-check" style="padding-left: 0;">
                                 <input type="radio" class="form-check-input modal_schedule" name="schedule"
                                        value="month" id="month" style="margin: auto; float: none;">
-                                <label class="form-check-label">月</label>
+                                <label class="form-check-label" for="month">月</label>
                             </div>
                             <div class="form-check" style="padding-left: 0;">
                                 <input type="radio" class="form-check-input modal_schedule" name="schedule" id="custom"
                                        style="margin: auto; float: none;" disabled>
-                                <label class="form-check-label">カスタム</label>
+                                <label class="form-check-label" for="custom">カスタム</label>
                             </div>
                         </div>
 
