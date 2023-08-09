@@ -220,21 +220,21 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 	}
 
 	// スケジュール削除POSTの場合
-	if ( array_key_exists( 'delete_schedule', $_POST ) ) {
-		$data = esc_html( $_POST['delete_schedule'] ?? '' );
-		// javascript用のjsonになっているのでPHPで扱えるようにする
-		$data = str_replace( '\\\\', '\\', $data );
-		$data = str_replace( '\\"', '"', $data );
-		$data = json_decode( $data, true );
+	if ( array_key_exists( 'delete_schedule_post_id', $_POST ) ) {
+		$post_id = intval( esc_html( $_POST['delete_schedule_post_id'] ?? 0 ) );
 
-		$post_id    = $data['post_id'];
-		$meta_value = $data['meta_value'];
+		if ( $post_id > 0 ) {
+			$meta_value = array(
+				'format'      => esc_html( $_POST['delete_schedule_format'] ?? '' ),
+				'description' => esc_html( $_POST['delete_schedule_description'] ?? '' ),
+			);
 
-		$resp = delete_post_meta(
-			$post_id,
-			PS_OPENRPA_SCHEDULE_KEY,
-			$meta_value
-		);
+			$resp = delete_post_meta(
+				$post_id,
+				PS_OPENRPA_SCHEDULE_KEY,
+				$meta_value
+			);
+		}
 	}
 
 	// スケジュール追加POSTの場合
@@ -457,26 +457,24 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 
 				$query     = new WP_Query( $args );
 				$max_pages = $query->max_num_pages;
+
 				if ( $query->have_posts() ) {
 					foreach ( $query->posts as $key => $post ) {
-						$task_obj      = json_decode( $post->post_content );
-						$schedules     = get_post_meta( $post->ID, PS_OPENRPA_SCHEDULE_KEY );
-						$schedules_tag = '';
-						foreach ( $schedules as $schedule ) {
-							// meta削除に必要なデータはjson化
-							$metas         = array(
-								'post_id'    => $post->ID,
-								'meta_value' => $schedule
-							);
-							$metas         = json_encode( $metas );
-							$schedules_tag .= "<form action='' method='post'><button type='submit' class='btn btn-light' name='delete_schedule' value={$metas} style='vertical-align: baseline; color: red; margin: 2px 5px 2px; padding: 2px;'>×</button><span>{$schedule['description']}</span></form>";
-						}
+						$task_obj  = json_decode( $post->post_content );
+						$schedules = get_post_meta( $post->ID, PS_OPENRPA_SCHEDULE_KEY );
+
 						echo '<tr>';
 						echo '<td class="align-middle">' . esc_html( $task_obj->name ) . '</td>';
 						echo '<td class="align-middle">' . esc_html( $task_obj->command ) . '</td>';
-						echo '<td class="align-middle">' . esc_html( $schedules_tag ) . '</td>';
-						echo '<td class="align-middle"><button type="button" class="btn btn-success add" value=' . esc_attr( $post->ID ) . 'data-bs-target="#additional_schedule" data-bs-toggle="modal">追加</button></td>';
-						echo '<td class="align-middle"><form action="" method="post"><button type="submit" class="btn btn-danger" name="delete_task" value=' . esc_attr( $post->ID ) . '>削除</button></form></td>';
+						echo '<td class="align-middle">';
+
+						foreach ( $schedules as $schedule ) {
+							echo '<form action="" method="post"><input type="hidden" name="delete_schedule_post_id" value="' . esc_attr( $post->ID ) . '"><input type="hidden" name="delete_schedule_format" value="' . esc_attr( $schedule['format'] ) . '"><input type="hidden" name="delete_schedule_description" value="' . esc_attr( $schedule['description'] ) . '"><button type="submit" class="btn btn-light" name="delete_schedule" style="vertical-align: baseline; color: red; margin: 2px 5px 2px; padding: 2px;">×</button><span>' . esc_html( $schedule['description'] ) . '</span></form>';
+						}
+
+						echo '</td>';
+						echo '<td class="align-middle"><button type="button" class="btn btn-success add" value="' . esc_attr( $post->ID ) . '" data-bs-target="#additional_schedule" data-bs-toggle="modal">追加</button></td>';
+						echo '<td class="align-middle"><form action="" method="post"><button type="submit" class="btn btn-danger" name="delete_task" value="' . esc_attr( $post->ID ) . '">削除</button></form></td>';
 						echo '</tr>';
 					}
 				}
