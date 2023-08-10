@@ -14,22 +14,22 @@ if ( function_exists( 'wp_get_current_user' ) ) {
 ?>
 
 <div class="container">
-    <div class="row" style="margin-top: 20px;">
-        <h3>タスク実行履歴</h3>
-    </div>
+	<div class="row" style="margin-top: 20px;">
+		<h3>タスク実行履歴</h3>
+	</div>
 
-    <div class="row justify-content-center">
-        <div class="col-12">
-            <table class="table">
-                <thead class="sticky-top">
-                <tr>
-                    <th scope="col" style="width: 30%;">名前</th>
-                    <th scope="col" style="width: 30%;">開始日時</th>
-                    <th scope="col" style="width: 30%;">完了日時</th>
-                    <th scope="col" style="width: 10%;">ステータス</th>
-                </tr>
-                </thead>
-                <tbody>
+	<div class="row justify-content-center">
+		<div class="col-12">
+			<table class="table">
+				<thead class="sticky-top">
+				<tr>
+					<th scope="col" style="width: 30%;">名前</th>
+					<th scope="col" style="width: 30%;">開始日時</th>
+					<th scope="col" style="width: 30%;">完了日時</th>
+					<th scope="col" style="width: 10%;">ステータス</th>
+				</tr>
+				</thead>
+				<tbody>
 				<?php
 				$paged = esc_html( $_GET['paged'] ?? 1 );
 
@@ -73,12 +73,12 @@ if ( function_exists( 'wp_get_current_user' ) ) {
 					}
 				}
 				?>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col text-end history-pagination">
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col text-end history-pagination">
 			<?php
 			$big             = 9999999;
 			$pagination_args = array(
@@ -91,6 +91,6 @@ if ( function_exists( 'wp_get_current_user' ) ) {
 			);
 			echo esc_url( paginate_links( $pagination_args ) );
 			?>
-        </div>
-    </div>
+		</div>
+	</div>
 </div>
