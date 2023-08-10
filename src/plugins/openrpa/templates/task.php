@@ -193,7 +193,7 @@ if ( function_exists( 'wp_get_current_user' ) ) {
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 	// タスク登録POSTの場合
 	if ( array_key_exists( 'command', $_POST ) && array_key_exists( 'schedule', $_POST ) ) {
-		if ( ! error_check() ) {
+		if ( ! ps_openrpa_error_check() ) {
 			$command   = esc_html( $_POST['command'] ?? '' );
 			$task_name = esc_html( $_POST['task_name'] ?? '' );
 			$post_id   = ps_openrpa_add_task( $user->ID, $now, $task_name, $command );
