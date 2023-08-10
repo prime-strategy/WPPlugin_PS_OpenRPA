@@ -248,196 +248,196 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 ?>
 
 <div class="container">
-    <div class="row" style="margin-top: 20px;">
-        <h3>タスク登録</h3>
-    </div>
+	<div class="row" style="margin-top: 20px;">
+		<h3>タスク登録</h3>
+	</div>
 
-    <div class="row">
-        <div class="col-12" id="error" style="color: red; margin: 5px 0 10px 0;"></div>
-    </div>
+	<div class="row">
+		<div class="col-12" id="error" style="color: red; margin: 5px 0 10px 0;"></div>
+	</div>
 
-    <form class="row" id="task" method="post">
-        <div class="col-2">
-            <h4>タスク名</h4>
-            <div class="row">
-                <div class="col-12">
-                    <label class="form-label">名前</label>
-                    <input type="text" class="form-control" name="task_name" placeholder="Myタスク" id="task_name">
-                </div>
-            </div>
-        </div>
+	<form class="row" id="task" method="post">
+		<div class="col-2">
+			<h4>タスク名</h4>
+			<div class="row">
+				<div class="col-12">
+					<label class="form-label">名前</label>
+					<input type="text" class="form-control" name="task_name" placeholder="Myタスク" id="task_name">
+				</div>
+			</div>
+		</div>
 
-        <div class="col-3">
-            <h4>OpenRPAタスク</h4>
-            <div class="row">
-                <div class="col-12">
-                    <label class="form-label">ワークフロー</label>
-                    <input type="text" class="form-control" name="command" placeholder="FilenameまたはタスクId" id="command">
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12" id="command_error" style="margin-top: 5px; color: red;"></div>
-            </div>
-        </div>
+		<div class="col-3">
+			<h4>OpenRPAタスク</h4>
+			<div class="row">
+				<div class="col-12">
+					<label class="form-label">ワークフロー</label>
+					<input type="text" class="form-control" name="command" placeholder="FilenameまたはタスクId" id="command">
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-12" id="command_error" style="margin-top: 5px; color: red;"></div>
+			</div>
+		</div>
 
-        <div class="col-7">
-            <h4>スケジュール</h4>
-            <div class="row">
-                <div class="col-2" style="border-right: 1px solid black;">
-                    <div class="form-check" style="padding-left: 0;">
-                        <input type="radio" class="form-check-input schedule" name="schedule" value="minute" id="minute"
-                               style="margin: auto; float: none;" checked>
-                        <label class="form-check-label" for="minute">分</label>
-                    </div>
-                    <div class="form-check" style="padding-left: 0;">
-                        <input type="radio" class="form-check-input schedule" name="schedule" value="hour" id="hour"
-                               style="margin: auto; float: none;">
-                        <label class="form-check-label" for="hour">時間</label>
-                    </div>
-                    <div class="form-check" style="padding-left: 0;">
-                        <input type="radio" class="form-check-input schedule" name="schedule" value="day" id="day"
-                               style="margin: auto; float: none;">
-                        <label class="form-check-label" for="day">日</label>
-                    </div>
-                    <div class="form-check" style="padding-left: 0;">
-                        <input type="radio" class="form-check-input schedule" name="schedule" value="week" id="week"
-                               style="margin: auto; float: none;">
-                        <label class="form-check-label" for="week">週</label>
-                    </div>
-                    <div class="form-check" style="padding-left: 0;">
-                        <input type="radio" class="form-check-input schedule" name="schedule" value="month" id="month"
-                               style="margin: auto; float: none;">
-                        <label class="form-check-label" for="month">月</label>
-                    </div>
-                    <div class="form-check" style="padding-left: 0;">
-                        <input type="radio" class="form-check-input schedule" name="schedule" id="custom"
-                               style="margin: auto; float: none;" disabled>
-                        <label class="form-check-label" for="custom">カスタム</label>
-                    </div>
-                </div>
+		<div class="col-7">
+			<h4>スケジュール</h4>
+			<div class="row">
+				<div class="col-2" style="border-right: 1px solid black;">
+					<div class="form-check" style="padding-left: 0;">
+						<input type="radio" class="form-check-input schedule" name="schedule" value="minute" id="minute"
+							   style="margin: auto; float: none;" checked>
+						<label class="form-check-label" for="minute">分</label>
+					</div>
+					<div class="form-check" style="padding-left: 0;">
+						<input type="radio" class="form-check-input schedule" name="schedule" value="hour" id="hour"
+							   style="margin: auto; float: none;">
+						<label class="form-check-label" for="hour">時間</label>
+					</div>
+					<div class="form-check" style="padding-left: 0;">
+						<input type="radio" class="form-check-input schedule" name="schedule" value="day" id="day"
+							   style="margin: auto; float: none;">
+						<label class="form-check-label" for="day">日</label>
+					</div>
+					<div class="form-check" style="padding-left: 0;">
+						<input type="radio" class="form-check-input schedule" name="schedule" value="week" id="week"
+							   style="margin: auto; float: none;">
+						<label class="form-check-label" for="week">週</label>
+					</div>
+					<div class="form-check" style="padding-left: 0;">
+						<input type="radio" class="form-check-input schedule" name="schedule" value="month" id="month"
+							   style="margin: auto; float: none;">
+						<label class="form-check-label" for="month">月</label>
+					</div>
+					<div class="form-check" style="padding-left: 0;">
+						<input type="radio" class="form-check-input schedule" name="schedule" id="custom"
+							   style="margin: auto; float: none;" disabled>
+						<label class="form-check-label" for="custom">カスタム</label>
+					</div>
+				</div>
 
-                <div class="col-8" id="schedule_form">
-                    <div class="row schedule_forms" style="margin-bottom: 5px;">
-                        <div class="col-2" id="minute_pre_text"></div>
-                        <div class="col-6">
-                            <select class="form-select" name="minute">
+				<div class="col-8" id="schedule_form">
+					<div class="row schedule_forms" style="margin-bottom: 5px;">
+						<div class="col-2" id="minute_pre_text"></div>
+						<div class="col-6">
+							<select class="form-select" name="minute">
 								<?php
 								for ( $i = 0; $i < 60; $i += 5 ) {
 									echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . '</option>';
 								}
 								?>
-                            </select>
-                        </div>
-                        <div class="col-4" id="minute_text">分ごとに開始</div>
-                    </div>
+							</select>
+						</div>
+						<div class="col-4" id="minute_text">分ごとに開始</div>
+					</div>
 
-                    <div class="row">
-                        <p class="">※このプロセスは(UTC)協定世界時のタイムゾーンでスケジュール設定され、夏時間の調整も自動的に行われます</p>
-                    </div>
-                    <div class="row justify-content-end">
-                        <div class="col-auto">
-                            <button type="submit" form="task" class="btn btn-primary">追加</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
+					<div class="row">
+						<p class="">※このプロセスは(UTC)協定世界時のタイムゾーンでスケジュール設定され、夏時間の調整も自動的に行われます</p>
+					</div>
+					<div class="row justify-content-end">
+						<div class="col-auto">
+							<button type="submit" form="task" class="btn btn-primary">追加</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
 </div>
 
 <!-- for modal -->
 <div class="container">
-    <div class="modal fade" id="additional_schedule" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header text-center">
-                    <h5 class="modal-title w-100">スケジュール追加</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+	<div class="modal fade" id="additional_schedule" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered modal-lg">
+			<div class="modal-content">
+				<div class="modal-header text-center">
+					<h5 class="modal-title w-100">スケジュール追加</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
 
-                <form class="modal-body" id="modal-body" method="post">
-                    <div class="row">
-                        <div class="col-2" style="border-right: 1px solid black;">
-                            <div class="form-check" style="padding-left: 0;">
-                                <input type="radio" class="form-check-input modal_schedule" name="schedule"
-                                       value="minute" id="minute" style="margin: auto; float: none;" checked>
-                                <label class="form-check-label" for="minute">分</label>
-                            </div>
-                            <div class="form-check" style="padding-left: 0;">
-                                <input type="radio" class="form-check-input modal_schedule" name="schedule" value="hour"
-                                       id="hour" style="margin: auto; float: none;">
-                                <label class="form-check-label" for="hour">時間</label>
-                            </div>
-                            <div class="form-check" style="padding-left: 0;">
-                                <input type="radio" class="form-check-input modal_schedule" name="schedule" value="day"
-                                       id="day" style="margin: auto; float: none;">
-                                <label class="form-check-label" for="day">日</label>
-                            </div>
-                            <div class="form-check" style="padding-left: 0;">
-                                <input type="radio" class="form-check-input modal_schedule" name="schedule" value="week"
-                                       id="week" style="margin: auto; float: none;">
-                                <label class="form-check-label" for="week">週</label>
-                            </div>
-                            <div class="form-check" style="padding-left: 0;">
-                                <input type="radio" class="form-check-input modal_schedule" name="schedule"
-                                       value="month" id="month" style="margin: auto; float: none;">
-                                <label class="form-check-label" for="month">月</label>
-                            </div>
-                            <div class="form-check" style="padding-left: 0;">
-                                <input type="radio" class="form-check-input modal_schedule" name="schedule" id="custom"
-                                       style="margin: auto; float: none;" disabled>
-                                <label class="form-check-label" for="custom">カスタム</label>
-                            </div>
-                        </div>
+				<form class="modal-body" id="modal-body" method="post">
+					<div class="row">
+						<div class="col-2" style="border-right: 1px solid black;">
+							<div class="form-check" style="padding-left: 0;">
+								<input type="radio" class="form-check-input modal_schedule" name="schedule"
+									   value="minute" id="minute" style="margin: auto; float: none;" checked>
+								<label class="form-check-label" for="minute">分</label>
+							</div>
+							<div class="form-check" style="padding-left: 0;">
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="hour"
+									   id="hour" style="margin: auto; float: none;">
+								<label class="form-check-label" for="hour">時間</label>
+							</div>
+							<div class="form-check" style="padding-left: 0;">
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="day"
+									   id="day" style="margin: auto; float: none;">
+								<label class="form-check-label" for="day">日</label>
+							</div>
+							<div class="form-check" style="padding-left: 0;">
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="week"
+									   id="week" style="margin: auto; float: none;">
+								<label class="form-check-label" for="week">週</label>
+							</div>
+							<div class="form-check" style="padding-left: 0;">
+								<input type="radio" class="form-check-input modal_schedule" name="schedule"
+									   value="month" id="month" style="margin: auto; float: none;">
+								<label class="form-check-label" for="month">月</label>
+							</div>
+							<div class="form-check" style="padding-left: 0;">
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" id="custom"
+									   style="margin: auto; float: none;" disabled>
+								<label class="form-check-label" for="custom">カスタム</label>
+							</div>
+						</div>
 
-                        <div class="col-8" id="modal_schedule_form">
-                            <div class="row modal_schedule_forms" style="margin-bottom: 5px;">
-                                <div class="col-2" id="modal_minute_pre_text"></div>
-                                <div class="col-6">
-                                    <select class="form-select" name="minute">
+						<div class="col-8" id="modal_schedule_form">
+							<div class="row modal_schedule_forms" style="margin-bottom: 5px;">
+								<div class="col-2" id="modal_minute_pre_text"></div>
+								<div class="col-6">
+									<select class="form-select" name="minute">
 										<?php
 										for ( $i = 0; $i < 60; $i += 5 ) {
 											echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . '</option>';
 										}
 										?>
-                                    </select>
-                                </div>
-                                <div class="col-4" id="modal_minute_text">分ごとに開始</div>
-                            </div>
+									</select>
+								</div>
+								<div class="col-4" id="modal_minute_text">分ごとに開始</div>
+							</div>
 
-                            <div class="row">
-                                <p class="">※このプロセスは(UTC)協定世界時のタイムゾーンでスケジュール設定され、夏時間の調整も自動的に行われます</p>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-                <div class="modal-footer">
-                    <button type="submit" form="modal-body" class="btn btn-primary" id="add_modal"
-                            name="additional_schedule" value="" data-bs-dismiss="modal">追加
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+							<div class="row">
+								<p class="">※このプロセスは(UTC)協定世界時のタイムゾーンでスケジュール設定され、夏時間の調整も自動的に行われます</p>
+							</div>
+						</div>
+					</div>
+				</form>
+				<div class="modal-footer">
+					<button type="submit" form="modal-body" class="btn btn-primary" id="add_modal"
+							name="additional_schedule" value="" data-bs-dismiss="modal">追加
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <div class="container">
-    <div class="row" style="margin-top: 20px;">
-        <h3>登録タスク一覧</h3>
-    </div>
-    <div class="row justify-content-center">
-        <div class="col-12">
-            <table class="table">
-                <thead class="sticky-top">
-                <tr>
-                    <th scope="col" style="width: 10%;">名前</th>
-                    <th scope="col" style="width: 25%;">コマンド</th>
-                    <th scope="col" style="width: 35%;">スケジュール</th>
-                    <th scope="col" style="width: 15%;">スケジュール追加</th>
-                    <th scope="col" style="width: 15%;">タスク削除</th>
-                </tr>
-                </thead>
-                <tbody>
+	<div class="row" style="margin-top: 20px;">
+		<h3>登録タスク一覧</h3>
+	</div>
+	<div class="row justify-content-center">
+		<div class="col-12">
+			<table class="table">
+				<thead class="sticky-top">
+				<tr>
+					<th scope="col" style="width: 10%;">名前</th>
+					<th scope="col" style="width: 25%;">コマンド</th>
+					<th scope="col" style="width: 35%;">スケジュール</th>
+					<th scope="col" style="width: 15%;">スケジュール追加</th>
+					<th scope="col" style="width: 15%;">タスク削除</th>
+				</tr>
+				</thead>
+				<tbody>
 				<?php
 				$paged = esc_html( $_GET['paged'] ?? 1 );
 
@@ -479,12 +479,12 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 					}
 				}
 				?>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col text-end task-pagination">
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col text-end task-pagination">
 			<?php
 			$big             = 9999999;
 			$pagination_args = array(
@@ -497,6 +497,6 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 			);
 			echo esc_url( paginate_links( $pagination_args ) );
 			?>
-        </div>
-    </div>
+		</div>
+	</div>
 </div>
