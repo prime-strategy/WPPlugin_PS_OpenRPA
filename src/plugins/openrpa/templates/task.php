@@ -9,7 +9,6 @@ if ( ! defined( 'PS_OPENRPA_SCHEDULE_KEY' ) ) {
 
 // タスク名重複確認
 function ps_openrpa_check_taskname( $user_id, $name ) {
-
 	$args  = array(
 		'author'         => $user_id,
 		'post_type'      => 'task',
@@ -36,23 +35,23 @@ function ps_openrpa_add_task( $user_id, $now, $task_name, $command ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※タスク名はユニークでなければいけません<br>";});</script>';
 
 		return false;
-	} else {
-		$post_content = array(
-			'name'    => $task_name,
-			'command' => $command
-		);
-		$post_args    = array(
-			'post_title'   => "{$user_id}_{$now}",
-			'post_content' => json_encode( $post_content, JSON_UNESCAPED_UNICODE ),
-			'post_type'    => 'task',
-			'post_author'  => $user_id,
-			'post_status'  => 'publish'
-		);
-
-		$post_id = wp_insert_post( $post_args );
-
-		return $post_id;
 	}
+
+	$post_content = array(
+		'name'    => $task_name,
+		'command' => $command,
+	);
+	$post_args    = array(
+		'post_title'   => "{$user_id}_{$now}",
+		'post_content' => json_encode( $post_content, JSON_UNESCAPED_UNICODE ),
+		'post_type'    => 'task',
+		'post_author'  => $user_id,
+		'post_status'  => 'publish',
+	);
+
+	$post_id = wp_insert_post( $post_args );
+
+	return $post_id;
 }
 
 // スケジュール登録

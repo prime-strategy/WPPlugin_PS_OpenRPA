@@ -59,25 +59,20 @@ class PS_OpenRPA_API_Method {
 	 * @return string $token
 	 */
 	public function create_token( $user_id ) {
-		$token      = bin2hex( random_bytes( 32 ) );
-		$token_file = "{$this->base_token_path}/{$token}{$this->token_end_name}";
-
-		// For Token file already exists
-		if ( file_exists( $token_file ) ) {
+		do {
 			$token      = bin2hex( random_bytes( 32 ) );
-			$token_file = "{$this->base_token_path}/{$token}{$this->token_end_name}";
-			// Duplicate yet
-			while ( file_exists( $token_file ) ) {
-				$token      = bin2hex( random_bytes( 32 ) );
-				$token_file = "{$this->base_token_path}/{$token}{$this->token_end_name}";
-			}
-		}
+			$token_file = $this->get_token_filepath( $token );
+		} while ( file_exists( $token_file ) );
 
 		$fp = fopen( $token_file, 'w' );
 		fwrite( $fp, $user_id );
 		fclose( $fp );
 
 		return $token;
+	}
+
+	private function get_token_filepath( $token ) {
+		return "{$this->base_token_path}/{$token}{$this->token_end_name}";
 	}
 
 	/**
@@ -91,19 +86,17 @@ class PS_OpenRPA_API_Method {
 	 * @return boolean
 	 */
 	public function check_token( $token, $user_id ) {
-		$token_file = "{$this->base_token_path}/{$token}{$this->token_end_name}";
-		if ( file_exists( $token_file ) ) {
+		$token_file = $this->get_token_filepath( $token );
+
+		if ( is_readable( $token_file ) ) {
 			$fp = fopen( $token_file, 'r' );
 			$id = fgets( $fp );
 			fclose( $fp );
-			if ( $id === $user_id ) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return false;
+
+			return $id === $user_id;
 		}
+
+		return false;
 	}
 
 	/**
@@ -274,14 +267,10 @@ class PS_OpenRPA_API_Method {
 
 				$dotw         = $this->parse_dotw( (int) $week );
 				$current_dotw = $dotw_arr[ date( 'w' ) ];
-				if ( false === array_search( $current_dotw, $dotw ) ) {
-					return false;
-				}
 
-				if ( 0 !== $now_month % $month ) {
-					return false;
-				}
-				if ( $now_hour !== $hour ) {
+				if ( ! array_search( $current_dotw, $dotw )
+				     || 0 !== $now_month % $month
+				     || $hour !== $now_hour ) {
 					return false;
 				}
 
@@ -295,10 +284,9 @@ class PS_OpenRPA_API_Method {
 				$week         = str_replace( 'W', '', $MWD );
 				$dotw         = $this->parse_dotw( (int) $week );
 				$current_dotw = $dotw_arr[ date( 'w' ) ];
-				if ( false === array_search( $current_dotw, $dotw ) ) {
-					return false;
-				}
-				if ( $now_hour !== $hour ) {
+
+				if ( ! array_search( $current_dotw, $dotw )
+				     || $hour !== $now_hour ) {
 					return false;
 				}
 
