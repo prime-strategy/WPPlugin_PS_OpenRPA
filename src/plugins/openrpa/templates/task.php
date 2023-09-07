@@ -7,6 +7,17 @@ if ( ! defined( 'PS_OPENRPA_SCHEDULE_KEY' ) ) {
 	define( 'PS_OPENRPA_SCHEDULE_KEY', '_schedule_time' );
 }
 
+function ps_openrapa_nonce_auth() {
+	$auth = wp_verify_nonce( $_REQUEST['_wpnonce'] );
+
+	if ( ! $auth ) {
+		$message = '認証エラー';
+		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="' . esc_html( $message ) . '<br />";});</script>';
+	}
+
+	return $auth;
+}
+
 // タスク名重複確認
 function ps_openrpa_check_taskname( $user_id, $name ) {
 	$args  = array(
@@ -30,6 +41,12 @@ function ps_openrpa_check_taskname( $user_id, $name ) {
 
 // タスク登録
 function ps_openrpa_add_task( $user_id, $now, $task_name, $command ) {
+	$nonce_auth = ps_openrapa_nonce_auth();
+
+	if ( ! $nonce_auth ) {
+		return false;
+	}
+
 	// 同じタスク名では登録できないよう
 	if ( false === ps_openrpa_check_taskname( $user_id, $task_name ) ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※タスク名はユニークでなければいけません<br>";});</script>';
@@ -56,14 +73,20 @@ function ps_openrpa_add_task( $user_id, $now, $task_name, $command ) {
 
 // スケジュール登録
 function ps_openrpa_add_schedule( $post_id ) {
+	$nonce_auth = ps_openrapa_nonce_auth();
+
+	if ( ! $nonce_auth ) {
+		return false;
+	}
+
 	$postmeta_id = 0;
-	$schedule    = esc_html( $_POST['schedule'] ?? '' );
+	$schedule    = sanitize_text_field( $_POST['schedule'] ?? '' );
 	$delta       = array(
-		'month'  => esc_html( $_POST['month'] ?? 0 ),
-		'week'   => esc_html( $_POST['week'] ?? 0 ),
-		'day'    => esc_html( $_POST['day'] ?? 0 ),
-		'hour'   => esc_html( $_POST['hour'] ?? 0 ),
-		'minute' => esc_html( $_POST['minute'] ?? 0 ),
+		'month'  => sanitize_text_field( $_POST['month'] ?? 0 ),
+		'week'   => sanitize_text_field( $_POST['week'] ?? 0 ),
+		'day'    => sanitize_text_field( $_POST['day'] ?? 0 ),
+		'hour'   => sanitize_text_field( $_POST['hour'] ?? 0 ),
+		'minute' => sanitize_text_field( $_POST['minute'] ?? 0 ),
 	);
 
 	switch ( $schedule ) {
@@ -192,11 +215,17 @@ if ( function_exists( 'wp_get_current_user' ) ) {
 }
 
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
+	$nonce_auth = ps_openrapa_nonce_auth();
+
+	if ( ! $nonce_auth ) {
+		return false;
+	}
+
 	// タスク登録POSTの場合
 	if ( array_key_exists( 'command', $_POST ) && array_key_exists( 'schedule', $_POST ) ) {
 		if ( ! ps_openrpa_error_check() ) {
-			$command   = esc_html( $_POST['command'] ?? '' );
-			$task_name = esc_html( $_POST['task_name'] ?? '' );
+			$command   = sanitize_text_field( $_POST['command'] ?? '' );
+			$task_name = sanitize_text_field( $_POST['task_name'] ?? '' );
 			$post_id   = ps_openrpa_add_task( $user->ID, $now, $task_name, $command );
 
 			if ( $post_id ) {
@@ -207,7 +236,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 
 	// タスク削除POSTの場合
 	if ( array_key_exists( 'delete_task', $_POST ) ) {
-		$post_id = esc_html( $_POST['delete_task'] ?? 0 );
+		$post_id = sanitize_text_field( $_POST['delete_task'] ?? 0 );
 
 		if ( ! is_int( $post_id ) || $post_id <= 0 ) {
 			echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="削除するタスク ID が不正です。<br>";});</script>';
@@ -222,12 +251,12 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 
 	// スケジュール削除POSTの場合
 	if ( array_key_exists( 'delete_schedule_post_id', $_POST ) ) {
-		$post_id = intval( esc_html( $_POST['delete_schedule_post_id'] ?? 0 ) );
+		$post_id = sanitize_text_field( $_POST['delete_schedule_post_id'] ?? 0 );
 
 		if ( $post_id > 0 ) {
 			$meta_value = array(
-				'format'      => esc_html( $_POST['delete_schedule_format'] ?? '' ),
-				'description' => esc_html( $_POST['delete_schedule_description'] ?? '' ),
+				'format'      => sanitize_text_field( $_POST['delete_schedule_format'] ?? '' ),
+				'description' => sanitize_text_field( $_POST['delete_schedule_description'] ?? '' ),
 			);
 
 			$resp = delete_post_meta(
@@ -240,7 +269,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 
 	// スケジュール追加POSTの場合
 	if ( array_key_exists( 'additional_schedule', $_POST ) ) {
-		$post_id = esc_html( $_POST['additional_schedule'] ?? '' );
+		$post_id = sanitize_text_field( $_POST['additional_schedule'] ?? '' );
 		if ( ! ps_openrpa_error_check() ) {
 			$postmeta_id = ps_openrpa_add_schedule( $post_id );
 		}
@@ -258,6 +287,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 	</div>
 
 	<form class="row" id="task" method="post">
+		<?php wp_nonce_field(); ?>
 		<div class="col-2">
 			<h4>タスク名</h4>
 			<div class="row">
@@ -357,6 +387,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 				</div>
 
 				<form class="modal-body" id="modal-body" method="post">
+					<?php wp_nonce_field(); ?>
 					<div class="row">
 						<div class="col-2" style="border-right: 1px solid black;">
 							<div class="form-check" style="padding-left: 0;">
@@ -440,7 +471,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 				</thead>
 				<tbody>
 				<?php
-				$paged = esc_html( $_GET['paged'] ?? 1 );
+				$paged = sanitize_text_field( $_GET['paged'] ?? 1 );
 
 				if ( ! is_int( $paged ) || $paged <= 0 ) {
 					$paged = 1;
@@ -470,12 +501,12 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 						echo '<td class="align-middle">';
 
 						foreach ( $schedules as $schedule ) {
-							echo '<form action="" method="post"><input type="hidden" name="delete_schedule_post_id" value="' . esc_attr( $post->ID ) . '"><input type="hidden" name="delete_schedule_format" value="' . esc_attr( $schedule['format'] ) . '"><input type="hidden" name="delete_schedule_description" value="' . esc_attr( $schedule['description'] ) . '"><button type="submit" class="btn btn-light" name="delete_schedule" style="vertical-align: baseline; color: red; margin: 2px 5px 2px; padding: 2px;">×</button><span>' . esc_html( $schedule['description'] ) . '</span></form>';
+							echo '<form action="" method="post">' . wp_nonce_field() . '<input type="hidden" name="delete_schedule_post_id" value="' . esc_attr( $post->ID ) . '"><input type="hidden" name="delete_schedule_format" value="' . esc_attr( $schedule['format'] ) . '"><input type="hidden" name="delete_schedule_description" value="' . esc_attr( $schedule['description'] ) . '"><button type="submit" class="btn btn-light" name="delete_schedule" style="vertical-align: baseline; color: red; margin: 2px 5px 2px; padding: 2px;">×</button><span>' . esc_html( $schedule['description'] ) . '</span></form>';
 						}
 
 						echo '</td>';
 						echo '<td class="align-middle"><button type="button" class="btn btn-success add" value="' . esc_attr( $post->ID ) . '" data-bs-target="#additional_schedule" data-bs-toggle="modal">追加</button></td>';
-						echo '<td class="align-middle"><form action="" method="post"><button type="submit" class="btn btn-danger" name="delete_task" value="' . esc_attr( $post->ID ) . '">削除</button></form></td>';
+						echo '<td class="align-middle"><form action="" method="post">' . wp_nonce_field() . '<button type="submit" class="btn btn-danger" name="delete_task" value="' . esc_attr( $post->ID ) . '">削除</button></form></td>';
 						echo '</tr>';
 					}
 				}
