@@ -56,13 +56,13 @@ function ps_openrpa_add_task( $user_id, $now, $task_name, $command ) {
 // スケジュール登録
 function ps_openrpa_add_schedule( $post_id ) {
 	$postmeta_id = 0;
-	$schedule    = esc_html( $_POST['schedule'] ?? '' );
+	$schedule    = sanitize_text_field( $_POST['schedule'] ?? '' );
 	$delta       = array(
-		'month'  => esc_html( $_POST['month'] ?? 0 ),
-		'week'   => esc_html( $_POST['week'] ?? 0 ),
-		'day'    => esc_html( $_POST['day'] ?? 0 ),
-		'hour'   => esc_html( $_POST['hour'] ?? 0 ),
-		'minute' => esc_html( $_POST['minute'] ?? 0 ),
+		'month'  => sanitize_text_field( $_POST['month'] ?? 0 ),
+		'week'   => sanitize_text_field( $_POST['week'] ?? 0 ),
+		'day'    => sanitize_text_field( $_POST['day'] ?? 0 ),
+		'hour'   => sanitize_text_field( $_POST['hour'] ?? 0 ),
+		'minute' => sanitize_text_field( $_POST['minute'] ?? 0 ),
 	);
 
 	switch ( $schedule ) {
@@ -194,8 +194,8 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 	// タスク登録POSTの場合
 	if ( array_key_exists( 'command', $_POST ) && array_key_exists( 'schedule', $_POST ) ) {
 		if ( ! ps_openrpa_error_check() ) {
-			$command   = esc_html( $_POST['command'] ?? '' );
-			$task_name = esc_html( $_POST['task_name'] ?? '' );
+			$command   = sanitize_text_field( $_POST['command'] ?? '' );
+			$task_name = sanitize_text_field( $_POST['task_name'] ?? '' );
 			$post_id   = ps_openrpa_add_task( $user->ID, $now, $task_name, $command );
 
 			if ( $post_id ) {
@@ -206,7 +206,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 
 	// タスク削除POSTの場合
 	if ( array_key_exists( 'delete_task', $_POST ) ) {
-		$post_id = esc_html( $_POST['delete_task'] ?? 0 );
+		$post_id = sanitize_text_field( $_POST['delete_task'] ?? 0 );
 
 		if ( ! is_int( $post_id ) || $post_id <= 0 ) {
 			echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="削除するタスク ID が不正です。<br>";});</script>';
@@ -221,12 +221,12 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 
 	// スケジュール削除POSTの場合
 	if ( array_key_exists( 'delete_schedule_post_id', $_POST ) ) {
-		$post_id = intval( esc_html( $_POST['delete_schedule_post_id'] ?? 0 ) );
+		$post_id = sanitize_text_field( $_POST['delete_schedule_post_id'] ?? 0 );
 
 		if ( $post_id > 0 ) {
 			$meta_value = array(
-				'format'      => esc_html( $_POST['delete_schedule_format'] ?? '' ),
-				'description' => esc_html( $_POST['delete_schedule_description'] ?? '' ),
+				'format'      => sanitize_text_field( $_POST['delete_schedule_format'] ?? '' ),
+				'description' => sanitize_text_field( $_POST['delete_schedule_description'] ?? '' ),
 			);
 
 			$resp = delete_post_meta(
@@ -239,7 +239,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 
 	// スケジュール追加POSTの場合
 	if ( array_key_exists( 'additional_schedule', $_POST ) ) {
-		$post_id = esc_html( $_POST['additional_schedule'] ?? '' );
+		$post_id = sanitize_text_field( $_POST['additional_schedule'] ?? '' );
 		if ( ! ps_openrpa_error_check() ) {
 			$postmeta_id = ps_openrpa_add_schedule( $post_id );
 		}
@@ -439,7 +439,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 				</thead>
 				<tbody>
 				<?php
-				$paged = esc_html( $_GET['paged'] ?? 1 );
+				$paged = sanitize_text_field( $_GET['paged'] ?? 1 );
 
 				if ( ! is_int( $paged ) || $paged <= 0 ) {
 					$paged = 1;
