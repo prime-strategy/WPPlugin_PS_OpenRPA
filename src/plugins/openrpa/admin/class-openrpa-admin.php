@@ -31,7 +31,7 @@ class PS_OpenRPA_Admin {
 		wp_enqueue_script( 'lightbox-js', plugins_url( 'assets/js/lib/lightbox.js', __DIR__ ), array(), '2.11.4' );
 		wp_enqueue_style( 'lightbox-css', plugins_url( 'assets/css/lib/lightbox.css', __DIR__ ), array(), '2.11.4' );
 		wp_enqueue_style( 'ps-openrpa-css', plugins_url( 'assets/css/ps-openrpa-admin.css', __DIR__ ), array(), '1.0.0' );
-		wp_enqueue_script( 'ps-openrpa-js', plugins_url( 'assets/js/ps-opanrpa-admin.js', __DIR__ ), array(), '1.0.0' );
+		wp_enqueue_script( 'ps-openrpa-js', plugins_url( 'assets/js/ps-openrpa-admin.js', __DIR__ ), array(), '1.0.0' );
 	}
 
 	/**

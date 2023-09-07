@@ -34,7 +34,7 @@ class PS_OpenRPA_API_Method {
 	/**
 	 * In Schedule, Allowed Minute Span
 	 *
-	 * @var intger
+	 * @var integer
 	 */
 	private $minute_span = 5;
 
@@ -59,25 +59,20 @@ class PS_OpenRPA_API_Method {
 	 * @return string $token
 	 */
 	public function create_token( $user_id ) {
-		$token      = bin2hex( random_bytes( 32 ) );
-		$token_file = "{$this->base_token_path}/{$token}{$this->token_end_name}";
-
-		// For Token file already exists
-		if ( file_exists( $token_file ) ) {
+		do {
 			$token      = bin2hex( random_bytes( 32 ) );
-			$token_file = "{$this->base_token_path}/{$token}{$this->token_end_name}";
-			// Duplicate yet
-			while ( file_exists( $token_file ) ) {
-				$token      = bin2hex( random_bytes( 32 ) );
-				$token_file = "{$this->base_token_path}/{$token}{$this->token_end_name}";
-			}
-		}
+			$token_file = $this->get_token_filepath( $token );
+		} while ( file_exists( $token_file ) );
 
 		$fp = fopen( $token_file, 'w' );
 		fwrite( $fp, $user_id );
 		fclose( $fp );
 
 		return $token;
+	}
+
+	private function get_token_filepath( $token ) {
+		return "{$this->base_token_path}/{$token}{$this->token_end_name}";
 	}
 
 	/**
@@ -91,19 +86,17 @@ class PS_OpenRPA_API_Method {
 	 * @return boolean
 	 */
 	public function check_token( $token, $user_id ) {
-		$token_file = "{$this->base_token_path}/{$token}{$this->token_end_name}";
-		if ( file_exists( $token_file ) ) {
+		$token_file = $this->get_token_filepath( $token );
+
+		if ( is_readable( $token_file ) ) {
 			$fp = fopen( $token_file, 'r' );
 			$id = fgets( $fp );
 			fclose( $fp );
-			if ( $id === $user_id ) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return false;
+
+			return $id === $user_id;
 		}
+
+		return false;
 	}
 
 	/**
@@ -117,8 +110,7 @@ class PS_OpenRPA_API_Method {
 	 */
 	public function check_header( $args ) {
 		foreach ( $args as $arg ) {
-			$arg = 'HTTP_' . $arg;
-			if ( ! array_key_exists( $arg, $_SERVER ) ) {
+			if ( ! array_key_exists( "HTTP_{$arg}", $_SERVER ) ) {
 				return false;
 			}
 		}
@@ -135,7 +127,8 @@ class PS_OpenRPA_API_Method {
 	 */
 	public function get_token_in_header() {
 		$token = esc_html( $_SERVER['HTTP_TOKEN'] ?? '' );
-		if ( is_null( $token ) ) {
+
+		if ( '' === $token ) {
 			return false;
 		}
 
@@ -158,13 +151,14 @@ class PS_OpenRPA_API_Method {
 
 		// check user exists
 		$user_obj = get_user_by( 'login', $username );
-		if ( $user_obj === false ) {
+
+		if ( ! $user_obj ) {
 			return false;
 		}
-		$user_id = $user_obj->ID;
 
 		// check appkey is correct
-		$user_app_keys = WP_Application_Passwords::get_user_application_passwords( $user_id );
+		$user_app_keys = WP_Application_Passwords::get_user_application_passwords( $user_obj->ID );
+
 		foreach ( $user_app_keys as $user_app_key ) {
 			if ( wp_check_password( $key, $user_app_key['password'] ) ) {
 				return true;
@@ -217,19 +211,19 @@ class PS_OpenRPA_API_Method {
 		$HM = $custom_format[1];
 
 		$now        = new Datetime( $now );
-		$now_minute = ( int ) $now->format( 'i' );
-		$now_hour   = ( int ) $now->format( 'H' );
-		$now_month  = ( int ) $now->format( 'm' );
+		$now_minute = (int) $now->format( 'i' );
+		$now_hour   = (int) $now->format( 'H' );
+		$now_month  = (int) $now->format( 'm' );
 
 		$do_time = $now->format( 'Y-m-d' ) . ' ';
 
 		// for hour and minute case, $MWD is empty
 		if ( empty( $MWD ) ) {
 			if ( false !== strpos( $HM, 'H' ) ) {
-				//for hour
+				// for hour
 				$HM     = explode( 'H', $HM );
-				$hour   = ( int ) $HM[0];
-				$minute = ( int ) str_replace( 'M', '', $HM[1] );
+				$hour   = (int) $HM[0];
+				$minute = (int) str_replace( 'M', '', $HM[1] );
 
 				if ( 0 !== $now_hour % $hour ) {
 					return false;
@@ -240,12 +234,9 @@ class PS_OpenRPA_API_Method {
 
 					return $do_time;
 				}
-
-				return false;
-
 			} else {
-				//for minute
-				$minute = ( int ) str_replace( 'M', '', $HM );
+				// for minute
+				$minute = (int) str_replace( 'M', '', $HM );
 
 				for ( $do = $minute; $do <= 60; $do += $minute ) {
 					if ( $now_minute < $do ) {
@@ -259,33 +250,27 @@ class PS_OpenRPA_API_Method {
 						return $do_time;
 					}
 				}
-
-				return false;
 			}
 		} else {
 			// for month, week and day case	
 			$HM     = explode( 'H', $HM );
-			$hour   = ( int ) $HM[0];
-			$minute = ( int ) str_replace( 'M', '', $HM[1] );
+			$hour   = (int) $HM[0];
+			$minute = (int) str_replace( 'M', '', $HM[1] );
 
 			$dotw_arr = array( '日', '月', '火', '水', '木', '金', '土' );
 
 			if ( false !== strpos( $MWD, 'M' ) ) {
-				//for month
+				// for month
 				$MW    = explode( 'M', $MWD );
-				$month = ( int ) $MW[0];
-				$week  = ( int ) str_replace( 'W', '', $MW[1] );
+				$month = (int) $MW[0];
+				$week  = (int) str_replace( 'W', '', $MW[1] );
 
-				$dotw         = $this->parse_dotw( ( int ) $week );
+				$dotw         = $this->parse_dotw( (int) $week );
 				$current_dotw = $dotw_arr[ date( 'w' ) ];
-				if ( false === array_search( $current_dotw, $dotw ) ) {
-					return false;
-				}
 
-				if ( 0 !== $now_month % $month ) {
-					return false;
-				}
-				if ( $now_hour !== $hour ) {
+				if ( ! array_search( $current_dotw, $dotw )
+				     || 0 !== $now_month % $month
+				     || $hour !== $now_hour ) {
 					return false;
 				}
 
@@ -294,18 +279,14 @@ class PS_OpenRPA_API_Method {
 
 					return $do_time;
 				}
-
-				return false;
-
-			} else if ( false !== strpos( $MWD, 'W' ) ) {
-				//for week
+			} elseif ( false !== strpos( $MWD, 'W' ) ) {
+				// for week
 				$week         = str_replace( 'W', '', $MWD );
-				$dotw         = $this->parse_dotw( ( int ) $week );
+				$dotw         = $this->parse_dotw( (int) $week );
 				$current_dotw = $dotw_arr[ date( 'w' ) ];
-				if ( false === array_search( $current_dotw, $dotw ) ) {
-					return false;
-				}
-				if ( $now_hour !== $hour ) {
+
+				if ( ! array_search( $current_dotw, $dotw )
+				     || $hour !== $now_hour ) {
 					return false;
 				}
 
@@ -314,10 +295,8 @@ class PS_OpenRPA_API_Method {
 
 					return $do_time;
 				}
-
-				return false;
 			} else {
-				//for daily
+				// for daily
 				if ( 0 !== $now_hour % $hour ) {
 					return false;
 				}
@@ -327,10 +306,10 @@ class PS_OpenRPA_API_Method {
 
 					return $do_time;
 				}
-
-				return false;
 			}
 		}
+
+		return false;
 	}
 
 	/**
