@@ -34,7 +34,7 @@ class PS_OpenRPA_API_Method {
 	/**
 	 * In Schedule, Allowed Minute Span
 	 *
-	 * @var intger
+	 * @var integer
 	 */
 	private $minute_span = 5;
 

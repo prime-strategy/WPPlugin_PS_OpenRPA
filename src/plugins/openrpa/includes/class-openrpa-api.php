@@ -48,7 +48,7 @@ class PS_OpenRPA_API {
 	private $Error = NULL;
 
 	/**
-	 * Initialuze Constants And API Hooks
+	 * Initialize Constants And API Hooks
 	 */
 	public function __construct() {
 		$this->Method = new PS_OpenRPA_API_Method();
