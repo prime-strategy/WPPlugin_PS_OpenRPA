@@ -12,7 +12,7 @@
 /*****************/
 .task-pagination .page-numbers {
 	padding: 10px;
-	border: 1px solid gray;
+	border: 1px solid grey;
 	border-radius: 3px;
 	background: ghostwhite;
 	color: black;
@@ -28,7 +28,7 @@
 /********************/
 .history-pagination .page-numbers {
 	padding: 10px;
-	border: 1px solid gray;
+	border: 1px solid grey;
 	border-radius: 3px;
 	background: ghostwhite;
 	color: black;
