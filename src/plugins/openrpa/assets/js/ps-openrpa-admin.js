@@ -337,7 +337,7 @@ function createForm(id, target, type) {
 }
 
 //追加でスケジュール登録する場合
-function addAditionalSchedule(event) {
+function addAdditionalSchedule(event) {
 	let post_id = this.value;
 	let addModalButton = document.getElementById('add_modal');
 	addModalButton.value = post_id;
@@ -361,6 +361,6 @@ window.onload = function () {
 	const add = document.getElementsByClassName('add');
 	let adds = Array.from(add);
 	for (let i = 0; i < adds.length; i++) {
-		adds[i].addEventListener('click', addAditionalSchedule);
+		adds[i].addEventListener('click', addAdditionalSchedule);
 	}
 }

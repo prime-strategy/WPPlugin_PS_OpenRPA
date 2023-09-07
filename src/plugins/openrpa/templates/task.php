@@ -9,17 +9,18 @@ if ( ! defined( 'PS_OPENRPA_SCHEDULE_KEY' ) ) {
 
 // タスク名重複確認
 function ps_openrpa_check_taskname( $user_id, $name ) {
-
 	$args  = array(
 		'author'         => $user_id,
 		'post_type'      => 'task',
 		'post_status'    => 'publish',
-		'posts_per_page' => -1
+		'posts_per_page' => -1,
 	);
 	$posts = get_posts( $args );
+
 	foreach ( $posts as $key => $post ) {
 		$task_obj = json_decode( $post->post_content );
-		if ( $task_obj->name === $name ) {
+
+		if ( $name === $task_obj->name ) {
 			return false;
 		}
 	}
@@ -34,23 +35,23 @@ function ps_openrpa_add_task( $user_id, $now, $task_name, $command ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※タスク名はユニークでなければいけません<br>";});</script>';
 
 		return false;
-	} else {
-		$post_content = array(
-			'name'    => $task_name,
-			'command' => $command
-		);
-		$post_args    = array(
-			'post_title'   => "{$user_id}_{$now}",
-			'post_content' => json_encode( $post_content, JSON_UNESCAPED_UNICODE ),
-			'post_type'    => 'task',
-			'post_author'  => $user_id,
-			'post_status'  => 'publish'
-		);
-
-		$post_id = wp_insert_post( $post_args );
-
-		return $post_id;
 	}
+
+	$post_content = array(
+		'name'    => $task_name,
+		'command' => $command,
+	);
+	$post_args    = array(
+		'post_title'   => "{$user_id}_{$now}",
+		'post_content' => json_encode( $post_content, JSON_UNESCAPED_UNICODE ),
+		'post_type'    => 'task',
+		'post_author'  => $user_id,
+		'post_status'  => 'publish',
+	);
+
+	$post_id = wp_insert_post( $post_args );
+
+	return $post_id;
 }
 
 // スケジュール登録
@@ -82,8 +83,8 @@ function ps_openrpa_add_schedule( $post_id ) {
 				PS_OPENRPA_SCHEDULE_KEY,
 				array(
 					'format'      => "PT{$delta['hour']}H{$delta['minute']}M",
-					'description' => "{$delta['hour']}時間ごと{$delta['minute']}分に開始"
-				)
+					'description' => "{$delta['hour']}時間ごと{$delta['minute']}分に開始",
+				),
 			);
 			break;
 		case 'day':
@@ -92,8 +93,8 @@ function ps_openrpa_add_schedule( $post_id ) {
 				PS_OPENRPA_SCHEDULE_KEY,
 				array(
 					'format'      => "P1DT{$delta['hour']}H{$delta['minute']}M",
-					'description' => "毎日{$delta['hour']}時{$delta['minute']}分に開始"
-				)
+					'description' => "毎日{$delta['hour']}時{$delta['minute']}分に開始",
+				),
 			);
 			break;
 		case 'week':
@@ -103,8 +104,8 @@ function ps_openrpa_add_schedule( $post_id ) {
 				PS_OPENRPA_SCHEDULE_KEY,
 				array(
 					'format'      => "P{$dotw['calc']}WT{$delta['hour']}H{$delta['minute']}M",
-					'description' => "毎週{$dotw['description']}曜日{$delta['hour']}時および{$delta['minute']}分に開始"
-				)
+					'description' => "毎週{$dotw['description']}曜日{$delta['hour']}時および{$delta['minute']}分に開始",
+				),
 			);
 			break;
 		case 'month':
@@ -114,8 +115,8 @@ function ps_openrpa_add_schedule( $post_id ) {
 				PS_OPENRPA_SCHEDULE_KEY,
 				array(
 					'format'      => "P{$delta['month']}M{$dotw['calc']}WT{$delta['hour']}H{$delta['minute']}M",
-					'description' => "{$delta['month']}カ月ごと毎週{$dotw['description']}曜日および{$delta['hour']}時{$delta['minute']}分に開始"
-				)
+					'description' => "{$delta['month']}カ月ごと毎週{$dotw['description']}曜日および{$delta['hour']}時{$delta['minute']}分に開始",
+				),
 			);
 			break;
 		case 'custom':
@@ -214,7 +215,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 
 		$args = array(
 			'ID'          => $post_id,
-			'post_status' => 'draft'
+			'post_status' => 'draft',
 		);
 		wp_update_post( $args );
 	}
@@ -232,7 +233,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 			$resp = delete_post_meta(
 				$post_id,
 				PS_OPENRPA_SCHEDULE_KEY,
-				$meta_value
+				$meta_value,
 			);
 		}
 	}
@@ -452,7 +453,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 					'posts_per_page' => 10,
 					'paged'          => $paged,
 					'orderby'        => 'date',
-					'order'          => 'DESC'
+					'order'          => 'DESC',
 				);
 
 				$query     = new WP_Query( $args );
