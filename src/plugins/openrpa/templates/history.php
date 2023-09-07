@@ -31,7 +31,7 @@ if ( function_exists( 'wp_get_current_user' ) ) {
 				</thead>
 				<tbody>
 				<?php
-				$paged = esc_html( $_GET['paged'] ?? 1 );
+				$paged = sanitize_text_field( $_GET['paged'] ?? 1 );
 
 				if ( ! is_int( $paged ) || $paged <= 0 ) {
 					$paged = 1;
