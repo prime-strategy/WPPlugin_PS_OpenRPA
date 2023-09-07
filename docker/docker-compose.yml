@@ -19,7 +19,14 @@ services:
       WORDPRESS_DB_USER: 'wordpress'
       WORDPRESS_DB_PASSWORD: 'wordpress'
       WORDPRESS_DB_NAME: 'wordpress'
-      WORDPRESS_DEBUG: 1
+      WORDPRESS_TABLE_PREFIX: wp_
+      WORDPRESS_DEBUG: true
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'WP_DISABLE_FATAL_ERROR_HANDLER', true );
+        define( 'WP_DEBUG_DISPLAY', true );
+        define( 'WP_ENVIRONMENT_TYPE', 'local' );
+        define( 'SCRIPT_DEBUG', true );
+        define( 'CONCATENATE_SCRIPTS', false );
 
   db:
     container_name: mysql
