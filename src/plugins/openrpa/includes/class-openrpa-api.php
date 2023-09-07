@@ -38,14 +38,14 @@ class PS_OpenRPA_API {
 	 *
 	 * @var null|object
 	 */
-	private $Method = NULL;
+	private $Method = null;
 
 	/**
 	 * PS OpenRPA Error Variable
 	 *
 	 * @var null|object
 	 */
-	private $Error = NULL;
+	private $Error = null;
 
 	/**
 	 * Initialize Constants And API Hooks
@@ -211,10 +211,8 @@ class PS_OpenRPA_API {
 		switch ( $method ) {
 			case 'GET':
 				return $this->Method->get_user_task( $user_id );
-				break;
 			case 'POST':
 				return $this->Method->add_user_task( $user_id );
-				break;
 			default:
 				return $this->Error->Error_500();
 		}
@@ -258,10 +256,8 @@ class PS_OpenRPA_API {
 		switch ( $method ) {
 			case 'PUT':
 				return $this->Method->update_user_task( $user_id, $task_id );
-				break;
 			case 'DELETE':
 				return $this->Method->delete_user_task( $user_id, $task_id );
-				break;
 			default:
 				return $this->Error->Error_500();
 		}
@@ -303,10 +299,8 @@ class PS_OpenRPA_API {
 		switch ( $method ) {
 			case 'GET':
 				return $this->Method->get_complete_task( $user_id );
-				break;
 			case 'POST':
 				return $this->Method->add_complete_task( $user_id );
-				break;
 			default:
 				return $this->Error->Error_500();
 		}

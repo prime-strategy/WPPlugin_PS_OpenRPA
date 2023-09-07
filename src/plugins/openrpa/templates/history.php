@@ -44,10 +44,11 @@ if ( function_exists( 'wp_get_current_user' ) ) {
 					'posts_per_page' => 10,
 					'paged'          => $paged,
 					'orderby'        => 'date',
-					'order'          => 'DESC'
+					'order'          => 'DESC',
 				);
 				$query     = new WP_Query( $args );
 				$max_pages = $query->max_num_pages;
+
 				if ( $query->have_posts() ) {
 					foreach ( $query->posts as $key => $post ) {
 						$result_obj    = json_decode( $post->post_content );
