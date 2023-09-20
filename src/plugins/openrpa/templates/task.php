@@ -41,9 +41,7 @@ function ps_openrpa_check_taskname( $user_id, $name ) {
 
 // タスク登録
 function ps_openrpa_add_task( $user_id, $now, $task_name, $command ) {
-	$nonce_auth = ps_openrapa_nonce_auth();
-
-	if ( ! $nonce_auth ) {
+	if ( ! check_admin_referer( 'openrpa_task' ) ) {
 		return false;
 	}
 
@@ -72,10 +70,8 @@ function ps_openrpa_add_task( $user_id, $now, $task_name, $command ) {
 }
 
 // スケジュール登録
-function ps_openrpa_add_schedule( $post_id ) {
-	$nonce_auth = ps_openrapa_nonce_auth();
-
-	if ( ! $nonce_auth ) {
+function ps_openrpa_add_schedule( $post_id, $post_sanitize ) {
+	if ( ! check_admin_referer( 'openrpa_task' ) ) {
 		return false;
 	}
 
@@ -214,7 +210,7 @@ if ( function_exists( 'wp_get_current_user' ) ) {
 	$now  = date( 'Ymd_His' );
 }
 
-if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
+if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
 	$nonce_auth = ps_openrapa_nonce_auth();
 
 	if ( ! $nonce_auth ) {
@@ -287,7 +283,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 	</div>
 
 	<form class="row" id="task" method="post">
-		<?php wp_nonce_field(); ?>
+		<?php wp_nonce_field( 'openrpa_task' ); ?>
 		<div class="col-2">
 			<h4>タスク名</h4>
 			<div class="row">
@@ -387,7 +383,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 				</div>
 
 				<form class="modal-body" id="modal-body" method="post">
-					<?php wp_nonce_field(); ?>
+					<?php wp_nonce_field( 'openrpa_task' ); ?>
 					<div class="row">
 						<div class="col-2" style="border-right: 1px solid black;">
 							<div class="form-check" style="padding-left: 0;">
@@ -501,12 +497,16 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 						echo '<td class="align-middle">';
 
 						foreach ( $schedules as $schedule ) {
-							echo '<form action="" method="post">' . wp_nonce_field() . '<input type="hidden" name="delete_schedule_post_id" value="' . esc_attr( $post->ID ) . '"><input type="hidden" name="delete_schedule_format" value="' . esc_attr( $schedule['format'] ) . '"><input type="hidden" name="delete_schedule_description" value="' . esc_attr( $schedule['description'] ) . '"><button type="submit" class="btn btn-light" name="delete_schedule" style="vertical-align: baseline; color: red; margin: 2px 5px 2px; padding: 2px;">×</button><span>' . esc_html( $schedule['description'] ) . '</span></form>';
+							echo '<form action="" method="post">';
+							wp_nonce_field( 'openrpa_task' );
+							echo '<input type="hidden" name="delete_schedule_post_id" value="' . esc_attr( $post->ID ) . '"><input type="hidden" name="delete_schedule_format" value="' . esc_attr( $schedule['format'] ) . '"><input type="hidden" name="delete_schedule_description" value="' . esc_attr( $schedule['description'] ) . '"><button type="submit" class="btn btn-light" name="delete_schedule" style="vertical-align: baseline; color: red; margin: 2px 5px 2px; padding: 2px;">×</button><span>' . esc_html( $schedule['description'] ) . '</span></form>';
 						}
 
 						echo '</td>';
 						echo '<td class="align-middle"><button type="button" class="btn btn-success add" value="' . esc_attr( $post->ID ) . '" data-bs-target="#additional_schedule" data-bs-toggle="modal">追加</button></td>';
-						echo '<td class="align-middle"><form action="" method="post">' . wp_nonce_field() . '<button type="submit" class="btn btn-danger" name="delete_task" value="' . esc_attr( $post->ID ) . '">削除</button></form></td>';
+						echo '<td class="align-middle"><form action="" method="post">';
+						wp_nonce_field( 'openrpa_task' );
+						echo '<button type="submit" class="btn btn-danger" name="delete_task" value="' . esc_attr( $post->ID ) . '">削除</button></form></td>';
 						echo '</tr>';
 					}
 				}
