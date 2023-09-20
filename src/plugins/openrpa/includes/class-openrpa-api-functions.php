@@ -46,7 +46,7 @@ class PS_OpenRPA_API_Method {
 	 * @return string $method Request Method
 	 */
 	public function get_request_method() {
-		return sanitize_text_field( $_SERVER['REQUEST_METHOD'] ?? '' );
+		return sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) );
 	}
 
 	/**
@@ -126,7 +126,7 @@ class PS_OpenRPA_API_Method {
 	 * @return boolean|string $token if not set return false
 	 */
 	public function get_token_in_header() {
-		$token = sanitize_text_field( $_SERVER['HTTP_TOKEN'] ?? '' );
+		$token = sanitize_text_field( wp_unslash( $_SERVER['HTTP_TOKEN'] ?? '' ) );
 
 		if ( '' === $token ) {
 			return false;
@@ -143,8 +143,8 @@ class PS_OpenRPA_API_Method {
 	 * @return boolean
 	 */
 	public function check_user_and_key() {
-		$username = sanitize_text_field( $_SERVER['HTTP_USERNAME'] ?? '' );
-		$key      = sanitize_text_field( $_SERVER['HTTP_APPLICATIONKEY'] ?? '' );
+		$username = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USERNAME'] ?? '' ) );
+		$key      = sanitize_text_field( wp_unslash( $_SERVER['HTTP_APPLICATIONKEY'] ?? '' ) );
 
 		// remove space
 		$key = str_replace( ' ', '', $key );
