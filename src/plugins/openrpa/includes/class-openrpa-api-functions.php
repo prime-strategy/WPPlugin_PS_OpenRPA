@@ -181,7 +181,8 @@ class PS_OpenRPA_API_Method {
 	private function parse_dotw( $num ) {
 		$week = array( '月', '火', '水', '木', '金', '土', '日' );
 		$dotw = array();
-		for ( $i = 0; $i < 7; $i ++ ) {
+
+		for ( $i = 0; $i < 7; $i++ ) {
 			if ( $num & 1 << $i ) {
 				array_push( $dotw, $week[ $i ] );
 			}
@@ -241,10 +242,11 @@ class PS_OpenRPA_API_Method {
 				for ( $do = $minute; $do <= 60; $do += $minute ) {
 					if ( $now_minute < $do ) {
 						if ( 60 === $do ) {
-							$do       = 0;
-							$now_hour += 1;
+							$do = 0;
+							$now_hour++;
 						}
-						$do      = sprintf( '%02d', $do );
+
+						$do       = sprintf( '%02d', $do );
 						$do_time .= "{$now_hour}:{$do}";
 
 						return $do_time;
@@ -252,7 +254,7 @@ class PS_OpenRPA_API_Method {
 				}
 			}
 		} else {
-			// for month, week and day case	
+			// for month, week and day case
 			$HM     = explode( 'H', $HM );
 			$hour   = (int) $HM[0];
 			$minute = (int) str_replace( 'M', '', $HM[1] );
@@ -268,9 +270,7 @@ class PS_OpenRPA_API_Method {
 				$dotw         = $this->parse_dotw( (int) $week );
 				$current_dotw = $dotw_arr[ date( 'w' ) ];
 
-				if ( ! array_search( $current_dotw, $dotw )
-				     || 0 !== $now_month % $month
-				     || $hour !== $now_hour ) {
+				if ( ! array_search( $current_dotw, $dotw ) || 0 !== $now_month % $month || $hour !== $now_hour ) {
 					return false;
 				}
 
@@ -285,8 +285,7 @@ class PS_OpenRPA_API_Method {
 				$dotw         = $this->parse_dotw( (int) $week );
 				$current_dotw = $dotw_arr[ date( 'w' ) ];
 
-				if ( ! array_search( $current_dotw, $dotw )
-				     || $hour !== $now_hour ) {
+				if ( ! array_search( $current_dotw, $dotw ) || $hour !== $now_hour ) {
 					return false;
 				}
 
@@ -331,7 +330,7 @@ class PS_OpenRPA_API_Method {
 			'author'         => $user_id,
 			'post_type'      => 'task',
 			'post_status'    => 'publish',
-			'posts_per_page' => - 1
+			'posts_per_page' => -1,
 		);
 		$posts = get_posts( $args );
 		foreach ( $posts as $post ) {
@@ -357,7 +356,7 @@ class PS_OpenRPA_API_Method {
 					'id'       => $post->ID,
 					'name'     => $task_obj->name,
 					'command'  => $task_obj->command,
-					'schedule' => $do_times
+					'schedule' => $do_times,
 				)
 			);
 		}
@@ -412,7 +411,7 @@ class PS_OpenRPA_API_Method {
 	public function delete_user_task( $user_id, $task_id ) {
 		$args = array(
 			'ID'          => $task_id,
-			'post_status' => 'draft'
+			'post_status' => 'draft',
 		);
 		wp_update_post( $args );
 	}
@@ -433,7 +432,7 @@ class PS_OpenRPA_API_Method {
 			'author'         => $user_id,
 			'post_type'      => 'result',
 			'post_status'    => 'publish',
-			'posts_per_page' => - 1
+			'posts_per_page' => -1,
 		);
 		$posts = get_posts( $args );
 		foreach ( $posts as $post ) {
@@ -449,7 +448,7 @@ class PS_OpenRPA_API_Method {
 					'end'      => $result_obj->end,
 					'next'     => $result_obj->next,
 					'status'   => $result_obj->status,
-					'schedule' => $schedules
+					'schedule' => $schedules,
 				)
 			);
 		}
@@ -478,20 +477,19 @@ class PS_OpenRPA_API_Method {
 			'start'   => $arr['start'] ?? '',
 			'end'     => $arr['end'] ?? '',
 			'next'    => $arr['next'] ?? '',
-			'status'  => $arr['status'] ?? ''
+			'status'  => $arr['status'] ?? '',
 		);
 
 		$post_array = array(
 			'post_title'   => $user_id . '_' . $now,
 			'post_type'    => 'result',
-			'post_content' => json_encode( $data, JSON_UNESCAPED_UNICODE ),
+			'post_content' => wp_json_encode( $data, JSON_UNESCAPED_UNICODE ),
 			'post_status'  => 'publish',
-			'post_author'  => $user_id
+			'post_author'  => $user_id,
 		);
 
 		$post_id = wp_insert_post( $post_array );
 
 		return $post_id;
 	}
-
 }

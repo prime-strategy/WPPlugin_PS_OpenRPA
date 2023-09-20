@@ -94,7 +94,6 @@ class PS_OpenRPA_Admin {
 	public function load_history_page() {
 		include_once PS_OPENRPA_PATH . 'templates/history.php';
 	}
-
 }
 
 new PS_OpenRPA_Admin();

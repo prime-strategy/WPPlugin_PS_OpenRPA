@@ -77,7 +77,7 @@ function ps_openrpa_add_task( $user_id, $now, $task_name, $command ) {
 	);
 	$post_args    = array(
 		'post_title'   => "{$user_id}_{$now}",
-		'post_content' => json_encode( $post_content, JSON_UNESCAPED_UNICODE ),
+		'post_content' => wp_json_encode( $post_content, JSON_UNESCAPED_UNICODE ),
 		'post_type'    => 'task',
 		'post_author'  => $user_id,
 		'post_status'  => 'publish',
@@ -112,7 +112,7 @@ function ps_openrpa_add_schedule( $post_id, $post_sanitize ) {
 				PS_OPENRPA_SCHEDULE_KEY,
 				array(
 					'format'      => "PT{$delta['minute']}M",
-					'description' => "{$delta['minute']}分ごとに開始"
+					'description' => "{$delta['minute']}分ごとに開始",
 				)
 			);
 			break;
@@ -188,16 +188,19 @@ function ps_openrpa_error_check( $post_sanitize ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※タスク名を入力してください<br>";});</script>';
 		$error = true;
 	}
+
 	// commandが空の場合エラー
 	if ( '' === $post_sanitize['command'] ?? '' ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※コマンドを入力してください<br>";});</script>';
 		$error = true;
 	}
+
 	// scheduleが分で0分毎の場合エラー
 	if ( 'minute' === $post_sanitize['schedule'] ?? '' && '0' === $post_sanitize['minute'] ?? '0' ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※分ごとの実行の場合0は指定できません<br>";});</script>';
 		$error = true;
 	}
+
 	// scheduleが週、月で曜日が一つもない場合エラー
 	if ( in_array( $post_sanitize['schedule'], array( 'week', 'month' ), true ) && array_intersect_key( $post_sanitize, $week ) === array() ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※曜日を指定してください<br>";});</script>';
@@ -316,33 +319,27 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
 			<div class="row">
 				<div class="col-2" style="border-right: 1px solid black;">
 					<div class="form-check" style="padding-left: 0;">
-						<input type="radio" class="form-check-input schedule" name="schedule" value="minute" id="minute"
-							   style="margin: auto; float: none;" checked>
+						<input type="radio" class="form-check-input schedule" name="schedule" value="minute" id="minute" style="margin: auto; float: none;" checked>
 						<label class="form-check-label" for="minute">分</label>
 					</div>
 					<div class="form-check" style="padding-left: 0;">
-						<input type="radio" class="form-check-input schedule" name="schedule" value="hour" id="hour"
-							   style="margin: auto; float: none;">
+						<input type="radio" class="form-check-input schedule" name="schedule" value="hour" id="hour" style="margin: auto; float: none;">
 						<label class="form-check-label" for="hour">時間</label>
 					</div>
 					<div class="form-check" style="padding-left: 0;">
-						<input type="radio" class="form-check-input schedule" name="schedule" value="day" id="day"
-							   style="margin: auto; float: none;">
+						<input type="radio" class="form-check-input schedule" name="schedule" value="day" id="day" style="margin: auto; float: none;">
 						<label class="form-check-label" for="day">日</label>
 					</div>
 					<div class="form-check" style="padding-left: 0;">
-						<input type="radio" class="form-check-input schedule" name="schedule" value="week" id="week"
-							   style="margin: auto; float: none;">
+						<input type="radio" class="form-check-input schedule" name="schedule" value="week" id="week" style="margin: auto; float: none;">
 						<label class="form-check-label" for="week">週</label>
 					</div>
 					<div class="form-check" style="padding-left: 0;">
-						<input type="radio" class="form-check-input schedule" name="schedule" value="month" id="month"
-							   style="margin: auto; float: none;">
+						<input type="radio" class="form-check-input schedule" name="schedule" value="month" id="month" style="margin: auto; float: none;">
 						<label class="form-check-label" for="month">月</label>
 					</div>
 					<div class="form-check" style="padding-left: 0;">
-						<input type="radio" class="form-check-input schedule" name="schedule" id="custom"
-							   style="margin: auto; float: none;" disabled>
+						<input type="radio" class="form-check-input schedule" name="schedule" id="custom" style="margin: auto; float: none;" disabled>
 						<label class="form-check-label" for="custom">カスタム</label>
 					</div>
 				</div>
@@ -391,33 +388,27 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
 					<div class="row">
 						<div class="col-2" style="border-right: 1px solid black;">
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule"
-									   value="minute" id="minute" style="margin: auto; float: none;" checked>
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="minute" id="minute" style="margin: auto; float: none;" checked>
 								<label class="form-check-label" for="minute">分</label>
 							</div>
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="hour"
-									   id="hour" style="margin: auto; float: none;">
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="hour" id="hour" style="margin: auto; float: none;">
 								<label class="form-check-label" for="hour">時間</label>
 							</div>
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="day"
-									   id="day" style="margin: auto; float: none;">
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="day" id="day" style="margin: auto; float: none;">
 								<label class="form-check-label" for="day">日</label>
 							</div>
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="week"
-									   id="week" style="margin: auto; float: none;">
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="week" id="week" style="margin: auto; float: none;">
 								<label class="form-check-label" for="week">週</label>
 							</div>
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule"
-									   value="month" id="month" style="margin: auto; float: none;">
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="month" id="month" style="margin: auto; float: none;">
 								<label class="form-check-label" for="month">月</label>
 							</div>
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule" id="custom"
-									   style="margin: auto; float: none;" disabled>
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" id="custom" style="margin: auto; float: none;" disabled>
 								<label class="form-check-label" for="custom">カスタム</label>
 							</div>
 						</div>
