@@ -169,7 +169,7 @@ class PS_OpenRPA_API {
 			return $this->Error->Error_404();
 		}
 
-		$user_obj = get_user_by( 'login', sanitize_text_field( $_SERVER['HTTP_USERNAME'] ?? '' ) );
+		$user_obj = get_user_by( 'login', sanitize_text_field( wp_unslash( $_SERVER['HTTP_USERNAME'] ?? '' ) ) );
 		$user_id  = $user_obj->ID;
 		$token    = $this->Method->create_token( $user_id );
 
