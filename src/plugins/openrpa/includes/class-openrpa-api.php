@@ -173,7 +173,10 @@ class PS_OpenRPA_API {
 		$user_id  = $user_obj->ID;
 		$token    = $this->Method->create_token( $user_id );
 
-		return array( 'userId' => $user_id, 'token' => $token );
+		return array(
+			'userId' => $user_id,
+			'token'  => $token,
+		);
 	}
 
 	/**
@@ -216,7 +219,6 @@ class PS_OpenRPA_API {
 			default:
 				return $this->Error->Error_500();
 		}
-
 	}
 
 	/**
@@ -305,8 +307,6 @@ class PS_OpenRPA_API {
 				return $this->Error->Error_500();
 		}
 	}
-
-
 }
 
 new PS_OpenRPA_API();
