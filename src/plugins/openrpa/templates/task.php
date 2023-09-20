@@ -7,15 +7,34 @@ if ( ! defined( 'PS_OPENRPA_SCHEDULE_KEY' ) ) {
 	define( 'PS_OPENRPA_SCHEDULE_KEY', '_schedule_time' );
 }
 
-function ps_openrapa_nonce_auth() {
-	$auth = wp_verify_nonce( $_REQUEST['_wpnonce'] );
+// 週
+function ps_openrpa_get_week() {
+	return array(
+		'monday'    => '月',
+		'tuesday'   => '火',
+		'wednesday' => '水',
+		'thursday'  => '木',
+		'friday'    => '金',
+		'saturday'  => '土',
+		'sunday'    => '日',
+	);
+}
 
-	if ( ! $auth ) {
-		$message = '認証エラー';
-		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="' . esc_html( $message ) . '<br />";});</script>';
+// POST サニタイジング
+function ps_openrpa_post_sanitize() {
+	if ( ! check_admin_referer( 'openrpa_task' ) ) {
+		return array();
 	}
 
-	return $auth;
+	$post_sanitize = array();
+
+	foreach ( $_POST as $key => $val ) {
+		if ( isset( $_POST[ $key ] ) ) {
+			$post_sanitize[ $key ] = sanitize_text_field( wp_unslash( $val ) );
+		}
+	}
+
+	return $post_sanitize;
 }
 
 // タスク名重複確認
@@ -79,14 +98,15 @@ function ps_openrpa_add_schedule( $post_id ) {
 		return false;
 	}
 
+	$week        = ps_openrpa_get_week();
 	$postmeta_id = 0;
-	$schedule    = sanitize_text_field( $_POST['schedule'] ?? '' );
+	$schedule    = $post_sanitize['schedule'] ?? '';
 	$delta       = array(
-		'month'  => sanitize_text_field( $_POST['month'] ?? 0 ),
-		'week'   => sanitize_text_field( $_POST['week'] ?? 0 ),
-		'day'    => sanitize_text_field( $_POST['day'] ?? 0 ),
-		'hour'   => sanitize_text_field( $_POST['hour'] ?? 0 ),
-		'minute' => sanitize_text_field( $_POST['minute'] ?? 0 ),
+		'month'  => $post_sanitize['month'] ?? 0,
+		'week'   => $post_sanitize['week'] ?? 0,
+		'day'    => $post_sanitize['day'] ?? 0,
+		'hour'   => $post_sanitize['hour'] ?? 0,
+		'minute' => $post_sanitize['minute'] ?? 0,
 	);
 
 	switch ( $schedule ) {
@@ -121,7 +141,7 @@ function ps_openrpa_add_schedule( $post_id ) {
 			);
 			break;
 		case 'week':
-			$dotw        = ps_openrpa_calc_dotw();
+			$dotw        = ps_openrpa_calc_dotw( $post_sanitize, $week );
 			$postmeta_id = add_post_meta(
 				$post_id,
 				PS_OPENRPA_SCHEDULE_KEY,
@@ -132,7 +152,7 @@ function ps_openrpa_add_schedule( $post_id ) {
 			);
 			break;
 		case 'month':
-			$dotw        = ps_openrpa_calc_dotw();
+			$dotw        = ps_openrpa_calc_dotw( $post_sanitize, $week );
 			$postmeta_id = add_post_meta(
 				$post_id,
 				PS_OPENRPA_SCHEDULE_KEY,
@@ -152,57 +172,40 @@ function ps_openrpa_add_schedule( $post_id ) {
 }
 
 // 実行曜日の加算
-function ps_openrpa_calc_dotw() {
-	$week = array(
-		'monday'    => '月',
-		'tuesday'   => '火',
-		'wednesday' => '水',
-		'thursday'  => '木',
-		'friday'    => '金',
-		'saturday'  => '土',
-		'sunday'    => '日',
+function ps_openrpa_calc_dotw( $post_sanitize, $week ) {
+	$dotw_calc = array_sum( array_intersect_key( $post_sanitize, $week ) );
+	$dotw_desc = implode( ',', array_intersect_key( $week, $post_sanitize ) ) ?? '';
+
+	return array(
+		'calc'        => $dotw_calc,
+		'description' => $dotw_desc,
 	);
-
-	$weekdays = array_intersect_key( $_POST, $week );
-	$dotw     = array_sum( $weekdays );
-
-	$weekdays_j = array_intersect_key( $week, $_POST );
-	$dotw_desc  = implode( ',', $weekdays_j ) ?? '';
-
-	return array( 'calc' => $dotw, 'description' => $dotw_desc );
 }
 
 // 入力エラーチェック
-function ps_openrpa_error_check() {
-	// エラーフラグ
+function ps_openrpa_error_check( $post_sanitize ) {
 	$error = false;
+	$week  = ps_openrpa_get_week();
+
 	// task_nameが空の場合エラー
-	if ( array_key_exists( 'task_name', $_POST ) && '' === $_POST['task_name'] ) {
+	if ( '' === $post_sanitize['task_name'] ?? '' ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※タスク名を入力してください<br>";});</script>';
 		$error = true;
 	}
 	// commandが空の場合エラー
-	if ( array_key_exists( 'command', $_POST ) && '' === $_POST['command'] ) {
+	if ( '' === $post_sanitize['command'] ?? '' ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※コマンドを入力してください<br>";});</script>';
 		$error = true;
 	}
 	// scheduleが分で0分毎の場合エラー
-	if ( 'minute' === $_POST['schedule'] && '0' === $_POST['minute'] ) {
+	if ( 'minute' === $post_sanitize['schedule'] ?? '' && '0' === $post_sanitize['minute'] ?? '0' ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※分ごとの実行の場合0は指定できません<br>";});</script>';
 		$error = true;
 	}
 	// scheduleが週、月で曜日が一つもない場合エラー
-	if ( 'week' === $_POST['schedule'] || 'month' === $_POST['schedule'] ) {
-		if ( ( ! array_key_exists( 'monday', $_POST ) &&
-		       ! array_key_exists( 'tuesday', $_POST ) &&
-		       ! array_key_exists( 'wednesday', $_POST ) &&
-		       ! array_key_exists( 'thursday', $_POST ) &&
-		       ! array_key_exists( 'friday', $_POST ) &&
-		       ! array_key_exists( 'saturday', $_POST ) &&
-		       ! array_key_exists( 'sunday', $_POST ) ) ) {
-			echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※曜日を指定してください<br>";});</script>';
-			$error = true;
-		}
+	if ( in_array( $post_sanitize['schedule'], array( 'week', 'month' ), true ) && array_intersect_key( $post_sanitize, $week ) === array() ) {
+		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※曜日を指定してください<br>";});</script>';
+		$error = true;
 	}
 
 	return $error;
@@ -211,9 +214,9 @@ function ps_openrpa_error_check() {
 // あらかじめユーザ情報とpost_titleにつけるprefixは取っておく
 if ( function_exists( 'wp_get_current_user' ) ) {
 	$user = wp_get_current_user();
-	$now  = date( 'Ymd_His' );
 }
 
+if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 	$nonce_auth = ps_openrapa_nonce_auth();
 
@@ -221,22 +224,23 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 		return false;
 	}
 
-	// タスク登録POSTの場合
-	if ( array_key_exists( 'command', $_POST ) && array_key_exists( 'schedule', $_POST ) ) {
-		if ( ! ps_openrpa_error_check() ) {
-			$command   = sanitize_text_field( $_POST['command'] ?? '' );
-			$task_name = sanitize_text_field( $_POST['task_name'] ?? '' );
-			$post_id   = ps_openrpa_add_task( $user->ID, $now, $task_name, $command );
+	$week          = ps_openrpa_get_week();
+	$post_sanitize = ps_openrpa_post_sanitize();
 
-			if ( $post_id ) {
-				$postmeta_id = ps_openrpa_add_schedule( $post_id );
-			}
+	// タスク登録POSTの場合
+	if ( isset( $post_sanitize['command'] ) && isset( $post_sanitize['schedule'] ) && ! ps_openrpa_error_check( $post_sanitize ) ) {
+		$command   = $post_sanitize['command'];
+		$task_name = $post_sanitize['task_name'];
+		$post_id   = ps_openrpa_add_task( $user->ID, date( 'Ymd_His' ), $task_name, $command );
+
+		if ( $post_id ) {
+			$postmeta_id = ps_openrpa_add_schedule( $post_id, $post_sanitize );
 		}
 	}
 
 	// タスク削除POSTの場合
-	if ( array_key_exists( 'delete_task', $_POST ) ) {
-		$post_id = sanitize_text_field( $_POST['delete_task'] ?? 0 );
+	if ( isset( $post_sanitize['delete_task'] ) ) {
+		$post_id = $post_sanitize['delete_task'];
 
 		if ( ! is_int( $post_id ) || $post_id <= 0 ) {
 			echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="削除するタスク ID が不正です。<br>";});</script>';
@@ -250,13 +254,13 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 	}
 
 	// スケジュール削除POSTの場合
-	if ( array_key_exists( 'delete_schedule_post_id', $_POST ) ) {
-		$post_id = sanitize_text_field( $_POST['delete_schedule_post_id'] ?? 0 );
+	if ( isset( $post_sanitize['delete_schedule_post_id'] ) ) {
+		$post_id = $post_sanitize['delete_schedule_post_id'];
 
 		if ( $post_id > 0 ) {
 			$meta_value = array(
-				'format'      => sanitize_text_field( $_POST['delete_schedule_format'] ?? '' ),
-				'description' => sanitize_text_field( $_POST['delete_schedule_description'] ?? '' ),
+				'format'      => $post_sanitize['delete_schedule_format'] ?? '',
+				'description' => $post_sanitize['delete_schedule_description'] ?? '',
 			);
 
 			$resp = delete_post_meta(
@@ -268,10 +272,11 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 	}
 
 	// スケジュール追加POSTの場合
-	if ( array_key_exists( 'additional_schedule', $_POST ) ) {
-		$post_id = sanitize_text_field( $_POST['additional_schedule'] ?? '' );
-		if ( ! ps_openrpa_error_check() ) {
-			$postmeta_id = ps_openrpa_add_schedule( $post_id );
+	if ( isset( $post_sanitize['additional_schedule'] ) ) {
+		$post_id = $post_sanitize['additional_schedule'];
+
+		if ( ! ps_openrpa_error_check( $post_sanitize ) ) {
+			$postmeta_id = ps_openrpa_add_schedule( $post_id, $post_sanitize );
 		}
 	}
 }
@@ -471,7 +476,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 				</thead>
 				<tbody>
 				<?php
-				$paged = sanitize_text_field( $_GET['paged'] ?? 1 );
+				$paged = sanitize_text_field( wp_unslash( $_GET['paged'] ?? 1 ) );
 
 				if ( ! is_int( $paged ) || $paged <= 0 ) {
 					$paged = 1;
