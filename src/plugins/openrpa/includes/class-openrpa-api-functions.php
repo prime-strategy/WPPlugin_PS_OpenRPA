@@ -180,7 +180,7 @@ class PS_OpenRPA_API_Method {
 	 *
 	 * @return string
 	 */
-private function calc_next_schedule( string $duration, \DateTimeImmutable $post_date_gmt ) {
+	private function calc_next_schedule( string $duration, \DateTimeImmutable $post_date_gmt ) {
 		$interval = new \PrimeStrategy\WP_Plugin\PS_OpenRPA\DateIntervalExtend( $duration );
 		$timezone = new \DateTimeZone( \DateTimeZone::UTC );
 		$now      = new \DateTimeImmutable( 'now', $timezone );
