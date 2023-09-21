@@ -111,7 +111,7 @@ function createWeekForm(target, type) {
 
 		let dotwLabel = document.createElement('label');
 		dotwLabel.className = 'form-check-label';
-		dotwLabel.for = dotwKeys[i];
+		dotwLabel.htmlFor = dotwKeys[i];
 		dotwLabel.textContent = dotwArray[dotwKeys[i]];
 
 		dotwForm.appendChild(dotwInput);
@@ -175,7 +175,7 @@ function createDayForm(target, type) {
 	minuteText.textContent = '分に開始';
 }
 
-function createHourForm(target, type) {
+function createHourForm(target, type, min = 0) {
 
 	let hourRow = document.createElement('div');
 	hourRow.className = 'row schedule_forms';
@@ -193,8 +193,8 @@ function createHourForm(target, type) {
 	hourSelect.className = 'form-select';
 	hourSelect.name = 'hour';
 
-	// 1～23時間までのoptionタグ作成
-	for (let i = 1; i < 24; i++) {
+	// min～23時間までのoptionタグ作成
+	for (let i = min; i < 24; i++) {
 		let hourOption = document.createElement('option');
 		hourOption.value = i;
 		hourOption.textContent = i;
@@ -226,7 +226,7 @@ function createHourForm(target, type) {
 	minuteText.textContent = '分に開始';
 }
 
-function createMinuteForm(target, type) {
+function createMinuteForm(target, type, min = 0) {
 
 	let minuteRow = document.createElement('div');
 	minuteRow.className = 'row schedule_forms';
@@ -244,8 +244,8 @@ function createMinuteForm(target, type) {
 	minuteSelect.className = 'form-select';
 	minuteSelect.name = 'minute';
 
-	// 0～55分までのoptionタグ作成
-	for (let i = 0; i < 60; i += 5) {
+	// min～55分までのoptionタグ作成
+	for (let i = min; i < 60; i += 5) {
 		let minuteOption = document.createElement('option');
 		minuteOption.value = i;
 		minuteOption.textContent = i;
@@ -287,7 +287,6 @@ function changeScheduleType(event) {
 
 // modal用changeイベント走る度にスケジュール入力フォーム作り直し
 function changeModalScheduleType(event) {
-	let id = this.id;
 	let targetForm = document.getElementById('modal_schedule_form');
 	let removeForm = document.getElementsByClassName('modal_schedule_forms');
 	let removeForms = Array.from(removeForm);
@@ -296,8 +295,7 @@ function changeModalScheduleType(event) {
 		targetForm.removeChild(removeForms[i]);
 	}
 
-	createForm(id, targetForm, 'modal');
-
+	createForm(this.value, targetForm, 'modal');
 }
 
 // form作成
@@ -305,11 +303,11 @@ function createForm(id, target, type) {
 
 	switch (id) {
 		case 'minute':
-			createMinuteForm(target, type);
+			createMinuteForm(target, type, 5);
 			break;
 		case 'hour':
 			createMinuteForm(target, type);
-			createHourForm(target, type);
+			createHourForm(target, type, 1);
 			break;
 		case 'day':
 			createMinuteForm(target, type);
@@ -346,17 +344,24 @@ function addAdditionalSchedule(event) {
 // ページ読み込み完了後にイベント追加
 window.onload = function () {
 
+	const ev = new Event("change", {
+		bubbles: false,
+		cancelable: true
+	})
+
 	const radio = document.getElementsByClassName('schedule');
 	let radios = Array.from(radio);
 	for (let i = 0; i < radios.length; i++) {
 		radios[i].addEventListener('change', changeScheduleType);
 	}
+	radios[0].dispatchEvent(ev);
 
 	const modalRadio = document.getElementsByClassName('modal_schedule');
 	let modalRadios = Array.from(modalRadio);
 	for (let i = 0; i < modalRadios.length; i++) {
 		modalRadios[i].addEventListener('change', changeModalScheduleType);
 	}
+	modalRadios[0].dispatchEvent(ev);
 
 	const add = document.getElementsByClassName('add');
 	let adds = Array.from(add);

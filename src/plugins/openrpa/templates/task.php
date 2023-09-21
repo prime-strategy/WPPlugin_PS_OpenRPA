@@ -187,30 +187,30 @@ function ps_openrpa_calc_dotw( $post_sanitize, $week ) {
 }
 
 // 入力エラーチェック
-function ps_openrpa_error_check( $post_sanitize ) {
+function ps_openrpa_error_check( array $post_sanitize, string $type = '' ) {
 	$error = false;
 	$week  = ps_openrpa_get_week();
 
 	// task_nameが空の場合エラー
-	if ( '' === $post_sanitize['task_name'] ?? '' ) {
+	if ( '' === ( $post_sanitize['task_name'] ?? '' ) && 'additional_schedule' !== $type ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※タスク名を入力してください<br>";});</script>';
 		$error = true;
 	}
 
 	// commandが空の場合エラー
-	if ( '' === $post_sanitize['command'] ?? '' ) {
+	if ( '' === ( $post_sanitize['command'] ?? '' ) && 'additional_schedule' !== $type ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※コマンドを入力してください<br>";});</script>';
 		$error = true;
 	}
 
 	// scheduleが分で0分毎の場合エラー
-	if ( 'minute' === $post_sanitize['schedule'] ?? '' && '0' === $post_sanitize['minute'] ?? '0' ) {
+	if ( 'minute' === ( $post_sanitize['schedule'] ?? '' ) && '0' === ( $post_sanitize['minute'] ?? '0' ) ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※分ごとの実行の場合0は指定できません<br>";});</script>';
 		$error = true;
 	}
 
 	// scheduleが週、月で曜日が一つもない場合エラー
-	if ( in_array( $post_sanitize['schedule'], array( 'week', 'month' ), true ) && array_intersect_key( $post_sanitize, $week ) === array() ) {
+	if ( in_array( ( $post_sanitize['schedule'] ?? '' ), array( 'week', 'month' ), true ) && array() === array_intersect_key( $post_sanitize, $week ) ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※曜日を指定してください<br>";});</script>';
 		$error = true;
 	}
@@ -279,7 +279,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
 	if ( isset( $post_sanitize['additional_schedule'] ) ) {
 		$post_id = $post_sanitize['additional_schedule'];
 
-		if ( ! ps_openrpa_error_check( $post_sanitize ) ) {
+		if ( ! ps_openrpa_error_check( $post_sanitize, 'additional_schedule' ) ) {
 			$postmeta_id = ps_openrpa_add_schedule( $post_id, $post_sanitize );
 		}
 	}
@@ -351,20 +351,6 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
 				</div>
 
 				<div class="col-8" id="schedule_form">
-					<div class="row schedule_forms" style="margin-bottom: 5px;">
-						<div class="col-2" id="minute_pre_text"></div>
-						<div class="col-6">
-							<select class="form-select" name="minute">
-								<?php
-								for ( $i = 0; $i < 60; $i += 5 ) {
-									echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . '</option>';
-								}
-								?>
-							</select>
-						</div>
-						<div class="col-4" id="minute_text">分ごとに開始</div>
-					</div>
-
 					<div class="row">
 						<p class="">※このプロセスは(UTC)協定世界時のタイムゾーンでスケジュール設定され、夏時間の調整も自動的に行われます</p>
 					</div>
@@ -394,46 +380,32 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
 					<div class="row">
 						<div class="col-2" style="border-right: 1px solid black;">
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="minute" id="minute" style="margin: auto; float: none;" checked>
-								<label class="form-check-label" for="minute">分</label>
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="minute" id="modal_minute" style="margin: auto; float: none;" checked>
+								<label class="form-check-label" for="modal_minute">分</label>
 							</div>
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="hour" id="hour" style="margin: auto; float: none;">
-								<label class="form-check-label" for="hour">時間</label>
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="hour" id="modal_hour" style="margin: auto; float: none;">
+								<label class="form-check-label" for="modal_hour">時間</label>
 							</div>
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="day" id="day" style="margin: auto; float: none;">
-								<label class="form-check-label" for="day">日</label>
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="day" id="modal_day" style="margin: auto; float: none;">
+								<label class="form-check-label" for="modal_day">日</label>
 							</div>
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="week" id="week" style="margin: auto; float: none;">
-								<label class="form-check-label" for="week">週</label>
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="week" id="modal_week" style="margin: auto; float: none;">
+								<label class="form-check-label" for="modal_week">週</label>
 							</div>
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="month" id="month" style="margin: auto; float: none;">
-								<label class="form-check-label" for="month">月</label>
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="month" id="modal_month" style="margin: auto; float: none;">
+								<label class="form-check-label" for="modal_month">月</label>
 							</div>
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule" id="custom" style="margin: auto; float: none;" disabled>
-								<label class="form-check-label" for="custom">カスタム</label>
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" id="modal_custom" style="margin: auto; float: none;" disabled>
+								<label class="form-check-label" for="modal_custom">カスタム</label>
 							</div>
 						</div>
 
 						<div class="col-8" id="modal_schedule_form">
-							<div class="row modal_schedule_forms" style="margin-bottom: 5px;">
-								<div class="col-2" id="modal_minute_pre_text"></div>
-								<div class="col-6">
-									<select class="form-select" name="minute">
-										<?php
-										for ( $i = 0; $i < 60; $i += 5 ) {
-											echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . '</option>';
-										}
-										?>
-									</select>
-								</div>
-								<div class="col-4" id="modal_minute_text">分ごとに開始</div>
-							</div>
-
 							<div class="row">
 								<p class="">※このプロセスは(UTC)協定世界時のタイムゾーンでスケジュール設定され、夏時間の調整も自動的に行われます</p>
 							</div>
