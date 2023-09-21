@@ -18,6 +18,11 @@ if ( ! class_exists( 'PS_OpenRPA_API_Error' ) ) {
  */
 class PS_OpenRPA_API_Method {
 	/**
+	 * Task 実行 JSON データフォーマットの保存バージョン
+	 */
+	const PS_OPENRPA_COMPLETE_TASK_JSON_VERSION = 1.0;
+
+	/**
 	 * Save Base Token Path
 	 *
 	 * @var string
@@ -421,6 +426,7 @@ class PS_OpenRPA_API_Method {
 		$now  = date( 'Ymd_His' );
 
 		$data = array(
+			'version' => PS_OPENRPA_COMPLETE_TASK_JSON_VERSION,
 			'id'      => $arr['id'] ?? 0,
 			'name'    => $arr['name'] ?? '',
 			'command' => $arr['command'] ?? '',

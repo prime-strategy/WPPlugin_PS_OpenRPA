@@ -7,6 +7,11 @@ if ( ! defined( 'PS_OPENRPA_SCHEDULE_KEY' ) ) {
 	define( 'PS_OPENRPA_SCHEDULE_KEY', '_schedule_time' );
 }
 
+/**
+ * Task 設定 JSON データフォーマットの保存バージョン
+ */
+const PS_OPENRPA_TASK_JSON_VERSION = 1.0;
+
 // 週
 function ps_openrpa_get_week() {
 	return array(
@@ -72,6 +77,7 @@ function ps_openrpa_add_task( $user_id, $now, $task_name, $command ) {
 	}
 
 	$post_content = array(
+		'version' => PS_OPENRPA_TASK_JSON_VERSION,
 		'name'    => $task_name,
 		'command' => $command,
 	);
