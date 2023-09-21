@@ -216,7 +216,7 @@ class PS_OpenRPA_API_Method {
 
 			// weekly to daily
 			if ( 0 < $interval->w ) {
-				$weekday      = ( (int) $now->format( 'N' ) ) - 1;	// 0 (Mon) ... 6 (Sun)
+				$weekday      = (int) $now->format( 'w' );	// 0 (Sun) ... 6 (Mon)
 				$weekly_shift = ( $interval->w << ( 7 - $weekday ) & 0b1111111 ) | $interval->w >> $weekday;
 
 				for ( $i = 0; $i < 7; ++$i ) {

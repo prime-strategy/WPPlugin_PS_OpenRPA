@@ -15,13 +15,13 @@ const PS_OPENRPA_TASK_JSON_VERSION = 1.0;
 // 週
 function ps_openrpa_get_week() {
 	return array(
+		'sunday'    => '日',
 		'monday'    => '月',
 		'tuesday'   => '火',
 		'wednesday' => '水',
 		'thursday'  => '木',
 		'friday'    => '金',
 		'saturday'  => '土',
-		'sunday'    => '日',
 	);
 }
 
