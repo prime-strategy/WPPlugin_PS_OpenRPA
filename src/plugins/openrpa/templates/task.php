@@ -224,9 +224,7 @@ if ( function_exists( 'wp_get_current_user' ) ) {
 }
 
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
-	$nonce_auth = ps_openrapa_nonce_auth();
-
-	if ( ! $nonce_auth ) {
+	if ( ! check_admin_referer( 'openrpa_task' ) ) {
 		return false;
 	}
 
