@@ -196,116 +196,64 @@ class PS_OpenRPA_API_Method {
 	 *
 	 * @access private
 	 *
-	 * @param string $format
-	 * @param object $now
+	 * @param string $duration ISO 8601 duration format. extend Week [W].
+	 * @param \DateTimeImmutable $now
 	 * @param string $post_date
 	 *
 	 * @return string | boolean
 	 */
-	private function calc_next_schedule( $format, $now ) {
-		$custom_format = str_replace( 'P', '', $format );
-		$custom_format = explode( 'T', $custom_format );
+	private function calc_next_schedule( $duration, $now ) {
+		preg_match( '/^(P.*?)(?:([0-9]{1})W)?([^W]*?)$/', $duration, $matches, PREG_OFFSET_CAPTURE );
 
-		// month, week, day
-		$MWD = $custom_format[0];
-		// hour, minute
-		$HM = $custom_format[1];
+		$interval = new \DateInterval( $matches[1][0] . $matches[3][0] );
+		$month    = (int) $interval->m;
+		$week     = (int) $matches[2][0];
+		$day      = (int) $interval->d;
+		$hour     = (int) $interval->h;
+		$minute   = (int) $interval->i;
 
-		$now        = new Datetime( $now );
 		$now_minute = (int) $now->format( 'i' );
 		$now_hour   = (int) $now->format( 'H' );
 		$now_month  = (int) $now->format( 'm' );
+		$do_time    = $now->format( 'Y-m-d' );
 
-		$do_time = $now->format( 'Y-m-d' ) . ' ';
-
-		// for hour and minute case, $MWD is empty
-		if ( empty( $MWD ) ) {
-			if ( false !== strpos( $HM, 'H' ) ) {
-				// for hour
-				$HM     = explode( 'H', $HM );
-				$hour   = (int) $HM[0];
-				$minute = (int) str_replace( 'M', '', $HM[1] );
-
-				if ( 0 !== $now_hour % $hour ) {
-					return false;
-				}
-
-				if ( $now_minute <= $minute && $minute < $now_minute + $this->minute_span ) {
-					$do_time .= "{$now_hour}:{$minute}";
-
-					return $do_time;
-				}
-			} else {
-				// for minute
-				$minute = (int) str_replace( 'M', '', $HM );
-
-				for ( $do = $minute; $do <= 60; $do += $minute ) {
-					if ( $now_minute < $do ) {
-						if ( 60 === $do ) {
-							$do = 0;
-							$now_hour++;
-						}
-
-						$do       = sprintf( '%02d', $do );
-						$do_time .= "{$now_hour}:{$do}";
-
-						return $do_time;
+		if ( 0 === ( $month + $week + $day + $hour ) && 0 < $minute ) {
+			// for minute
+			for ( $do = $minute; $do <= 60; $do += $minute ) {
+				if ( $now_minute < $do ) {
+					if ( 60 === $do ) {
+						$do = 0;
+						++$now_hour;
 					}
+
+					$do = sprintf( '%02d', $do );
+
+					return "{$do_time} {$now_hour}:{$do}";
 				}
+			}
+
+			return false;
+		}
+
+		if ( 0 < $month || 0 < $week ) {
+			// for month, week
+			$dotw         = $this->parse_dotw( $week );
+			$dotw_arr     = array( '日', '月', '火', '水', '木', '金', '土' );
+			$current_dotw = $dotw_arr[ date( 'w' ) ];
+
+			if ( ! in_array( $current_dotw, $dotw, true ) || $hour !== $now_hour || ( 0 < $month && 0 !== $now_month % $month ) ) {
+				return false;
 			}
 		} else {
-			// for month, week and day case
-			$HM     = explode( 'H', $HM );
-			$hour   = (int) $HM[0];
-			$minute = (int) str_replace( 'M', '', $HM[1] );
-
-			$dotw_arr = array( '日', '月', '火', '水', '木', '金', '土' );
-
-			if ( false !== strpos( $MWD, 'M' ) ) {
-				// for month
-				$MW    = explode( 'M', $MWD );
-				$month = (int) $MW[0];
-				$week  = (int) str_replace( 'W', '', $MW[1] );
-
-				$dotw         = $this->parse_dotw( (int) $week );
-				$current_dotw = $dotw_arr[ date( 'w' ) ];
-
-				if ( ! array_search( $current_dotw, $dotw ) || 0 !== $now_month % $month || $hour !== $now_hour ) {
-					return false;
-				}
-
-				if ( $now_minute <= $minute && $minute < $now_minute + $this->minute_span ) {
-					$do_time .= "{$now_hour}:{$minute}";
-
-					return $do_time;
-				}
-			} elseif ( false !== strpos( $MWD, 'W' ) ) {
-				// for week
-				$week         = str_replace( 'W', '', $MWD );
-				$dotw         = $this->parse_dotw( (int) $week );
-				$current_dotw = $dotw_arr[ date( 'w' ) ];
-
-				if ( ! array_search( $current_dotw, $dotw ) || $hour !== $now_hour ) {
-					return false;
-				}
-
-				if ( $now_minute <= $minute && $minute < $now_minute + $this->minute_span ) {
-					$do_time .= "{$now_hour}:{$minute}";
-
-					return $do_time;
-				}
-			} else {
-				// for daily
-				if ( 0 !== $now_hour % $hour ) {
-					return false;
-				}
-
-				if ( $now_minute <= $minute && $minute < $now_minute + $this->minute_span ) {
-					$do_time .= "{$now_hour}:{$minute}";
-
-					return $do_time;
-				}
+			// for day, hour
+			if ( 0 !== $now_hour % $hour ) {
+				return false;
 			}
+		}
+
+		// for month, week, day, hour
+		if ( $now_minute <= $minute && $minute < $now_minute + $this->minute_span ) {
+			return "{$do_time} {$now_hour}:{$minute}";
 		}
 
 		return false;
@@ -321,18 +269,20 @@ class PS_OpenRPA_API_Method {
 	 * @return array
 	 */
 	public function get_user_task( $user_id ) {
+		$timezone = new \DateTimeZone( get_option( 'timezone_string' ) );
+		$now      = new \DateTimeImmutable( 'now', $timezone );
 		$response = array();
-
-		date_default_timezone_set( get_option( 'timezone_string' ) );
-		$now   = new DateTime();
-		$now   = $now->format( 'Y-m-d H:i:s' );
-		$args  = array(
-			'author'         => $user_id,
-			'post_type'      => 'task',
-			'post_status'    => 'publish',
-			'posts_per_page' => -1,
+		$posts    = get_posts(
+			array(
+				'author'         => $user_id,
+				'post_type'      => 'task',
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+			)
 		);
-		$posts = get_posts( $args );
+
+		date_default_timezone_set( $timezone->getName() );
+
 		foreach ( $posts as $post ) {
 			$task_obj  = json_decode( $post->post_content );
 			$schedules = get_post_meta( $post->ID, '_schedule_time' );
