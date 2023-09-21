@@ -20,6 +20,11 @@ include_once PS_OPENRPA_PATH . 'includes/DateIntervalExtend.php';
  */
 class PS_OpenRPA_API_Method {
 	/**
+	 * Task 実行 JSON データフォーマットの保存バージョン
+	 */
+	const PS_OPENRPA_COMPLETE_TASK_JSON_VERSION = 1.0;
+
+	/**
 	 * Save Base Token Path
 	 *
 	 * @var string
@@ -394,6 +399,7 @@ class PS_OpenRPA_API_Method {
 		$now      = new \DateTimeImmutable( 'now', $timezone );
 
 		$data = array(
+			'version' => PS_OPENRPA_COMPLETE_TASK_JSON_VERSION,
 			'id'      => $arr['id'] ?? 0,
 			'name'    => $arr['name'] ?? '',
 			'command' => $arr['command'] ?? '',
