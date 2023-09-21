@@ -262,29 +262,25 @@ class PS_OpenRPA_API_Method {
 		foreach ( $posts as $post ) {
 			$task_obj  = json_decode( $post->post_content );
 			$schedules = get_post_meta( $post->ID, '_schedule_time' );
+			$do_times  = array();
 
-			$do_times = array();
 			foreach ( $schedules as $schedule ) {
 				$next = $this->calc_next_schedule( $schedule['format'], $post_date_gmt );
 
-				if ( '' === $next ) {
-					continue;
+				if ( '' !== $next ) {
+					$do_times[] = $next;
 				}
-				array_push( $do_times, $next );
 			}
 
-			if ( true === empty( $do_times ) ) {
+			if ( array() === $do_times ) {
 				continue;
 			}
-			$do_times = array_unique( $do_times );
-			array_push(
-				$response,
-				array(
-					'id'       => $post->ID,
-					'name'     => $task_obj->name,
-					'command'  => $task_obj->command,
-					'schedule' => $do_times,
-				)
+
+			$response[] = array(
+				'id'       => $post->ID,
+				'name'     => $task_obj->name,
+				'command'  => $task_obj->command,
+				'schedule' => array_unique( $do_times ),
 			);
 		}
 
@@ -336,11 +332,12 @@ class PS_OpenRPA_API_Method {
 	 * @return array
 	 */
 	public function delete_user_task( $user_id, $task_id ) {
-		$args = array(
-			'ID'          => $task_id,
-			'post_status' => 'draft',
+		wp_update_post(
+			array(
+				'ID'          => $task_id,
+				'post_status' => 'draft',
+			)
 		);
-		wp_update_post( $args );
 	}
 
 	/**
@@ -354,29 +351,27 @@ class PS_OpenRPA_API_Method {
 	 */
 	public function get_complete_task( $user_id ) {
 		$response = array();
-
-		$args  = array(
-			'author'         => $user_id,
-			'post_type'      => 'result',
-			'post_status'    => 'publish',
-			'posts_per_page' => -1,
+		$posts    = get_posts(
+			array(
+				'author'         => $user_id,
+				'post_type'      => 'result',
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+			)
 		);
-		$posts = get_posts( $args );
+
 		foreach ( $posts as $post ) {
 			$result_obj = json_decode( $post->post_content );
 			$schedules  = get_post_meta( $result_obj->id, '_schedule_time' );
-			array_push(
-				$response,
-				array(
-					'id'       => $result_obj->id,
-					'name'     => $result_obj->name,
-					'command'  => $result_obj->command,
-					'start'    => $result_obj->start,
-					'end'      => $result_obj->end,
-					'next'     => $result_obj->next,
-					'status'   => $result_obj->status,
-					'schedule' => $schedules,
-				)
+			$response[] = array(
+				'id'       => $result_obj->id,
+				'name'     => $result_obj->name,
+				'command'  => $result_obj->command,
+				'start'    => $result_obj->start,
+				'end'      => $result_obj->end,
+				'next'     => $result_obj->next,
+				'status'   => $result_obj->status,
+				'schedule' => $schedules,
 			);
 		}
 
@@ -393,10 +388,10 @@ class PS_OpenRPA_API_Method {
 	 * @return array
 	 */
 	public function add_complete_task( $user_id ) {
-		$json = file_get_contents( 'php://input' );
-		$arr  = json_decode( $json, true );
 		$timezone = new \DateTimeZone( \DateTimeZone::UTC );
 		$now      = new \DateTimeImmutable( 'now', $timezone );
+		$json     = file_get_contents( 'php://input' );
+		$arr      = json_decode( $json, true );
 
 		$data = array(
 			'version' => PS_OPENRPA_COMPLETE_TASK_JSON_VERSION,
@@ -409,15 +404,15 @@ class PS_OpenRPA_API_Method {
 			'status'  => $arr['status'] ?? '',
 		);
 
-		$post_array = array(
-			'post_title'   => $user_id . $now->format( '_Ymd_His' ),
-			'post_type'    => 'result',
-			'post_content' => wp_json_encode( $data, JSON_UNESCAPED_UNICODE ),
-			'post_status'  => 'publish',
-			'post_author'  => $user_id,
+		$post_id = wp_insert_post(
+			array(
+				'post_title'   => $user_id . $now->format( '_Ymd_His' ),
+				'post_type'    => 'result',
+				'post_content' => wp_json_encode( $data, JSON_UNESCAPED_UNICODE ),
+				'post_status'  => 'publish',
+				'post_author'  => $user_id,
+			)
 		);
-
-		$post_id = wp_insert_post( $post_array );
 
 		return $post_id;
 	}
