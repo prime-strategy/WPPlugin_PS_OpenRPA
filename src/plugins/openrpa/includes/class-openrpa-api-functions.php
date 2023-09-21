@@ -11,6 +11,8 @@ if ( ! class_exists( 'PS_OpenRPA_API_Error' ) ) {
 	include_once PS_OPENRPA_PATH . 'includes/class-openrpa-api-errors.php';
 }
 
+include_once PS_OPENRPA_PATH . 'includes/DateIntervalExtend.php';
+
 /**
  * PS OpenRPA API Method Class
  *
@@ -169,94 +171,64 @@ class PS_OpenRPA_API_Method {
 	}
 
 	/**
-	 * Parse Day of the Week
-	 * shift left for 7 times
-	 *
-	 * @access private
-	 *
-	 * @param integer $num
-	 *
-	 * @return array $dotw
-	 */
-	private function parse_dotw( $num ) {
-		$week = array( '月', '火', '水', '木', '金', '土', '日' );
-		$dotw = array();
-
-		for ( $i = 0; $i < 7; $i++ ) {
-			if ( $num & 1 << $i ) {
-				array_push( $dotw, $week[ $i ] );
-			}
-		}
-
-		return $dotw;
-	}
-
-	/**
 	 * Calc Schedule Time
 	 *
 	 * @access private
 	 *
 	 * @param string $duration ISO 8601 duration format. extend Week [W].
-	 * @param \DateTimeImmutable $now
-	 * @param string $post_date
+	 * @param \DateTimeImmutable $post_date_gmt
 	 *
-	 * @return string | boolean
+	 * @return string
 	 */
-	private function calc_next_schedule( $duration, $now ) {
-		preg_match( '/^(P.*?)(?:([0-9]{1})W)?([^W]*?)$/', $duration, $matches, PREG_OFFSET_CAPTURE );
+	private function calc_next_schedule( string $duration, \DateTimeImmutable $post_date_gmt ) {
+		$interval = new \PrimeStrategy\WP_Plugin\PS_OpenRPA\DateIntervalExtend( $duration );
+		$timezone = new \DateTimeZone( \DateTimeZone::UTC );
+		$now      = new \DateTimeImmutable( 'now', $timezone );
+		$format   = 'Y-m-d H:i:s';
 
-		$interval = new \DateInterval( $matches[1][0] . $matches[3][0] );
-		$month    = (int) $interval->m;
-		$week     = (int) $matches[2][0];
-		$day      = (int) $interval->d;
-		$hour     = (int) $interval->h;
-		$minute   = (int) $interval->i;
+		// for minutely
+		if ( 0 === ( $interval->m + $interval->w + $interval->d + $interval->h ) && 0 < $interval->i ) {
+			$diff          = $post_date_gmt->diff( $now );
+			$diff_unit     = ( ( ( $diff->format( '%r%a' ) * 24 + $diff->format( '%r%h' ) ) * 60 + $diff->format( '%r%i' ) ) * 60 + $diff->format( '%r%s' ) ) / 60;
+			$interval_add  = new DateInterval( 'PT' . ( ceil( $diff_unit / $interval->i ) * $interval->i ) . 'M' );
+			$next_datetime = $post_date_gmt->add( $interval_add );
 
-		$now_minute = (int) $now->format( 'i' );
-		$now_hour   = (int) $now->format( 'H' );
-		$now_month  = (int) $now->format( 'm' );
-		$do_time    = $now->format( 'Y-m-d' );
+			return $next_datetime->format( $format );
+		}
 
-		if ( 0 === ( $month + $week + $day + $hour ) && 0 < $minute ) {
-			// for minute
-			for ( $do = $minute; $do <= 60; $do += $minute ) {
-				if ( $now_minute < $do ) {
-					if ( 60 === $do ) {
-						$do = 0;
-						++$now_hour;
+		// for hourly
+		if ( 0 === ( $interval->m + $interval->w + $interval->d ) && 0 < $interval->h ) {
+			$hour          = (int) $now->format( 'H' );
+			$interval_add  = new DateInterval( "PT{$interval->h}H" );
+			$next_datetime = $now->setTime( $hour, $interval->i )->add( $interval_add );
+
+			return $next_datetime->format( $format );
+		}
+
+		// for monthly, weekly, daily
+		if ( ( 0 === $interval->d && 0 < $interval->m && 0 < $interval->w ) || ( 0 === ( $interval->m + $interval->d ) && 0 < $interval->w ) || ( 0 === ( $interval->m + $interval->w ) && 0 < $interval->d ) ) {
+			$add_day = $interval->d;
+
+			// weekly to daily
+			if ( 0 < $interval->w ) {
+				$weekday      = ( (int) $now->format( 'N' ) ) - 1;	// 0 (Mon) ... 6 (Sun)
+				$weekly_shift = ( $interval->w << ( 7 - $weekday ) & 0b1111111 ) | $interval->w >> $weekday;
+
+				for ( $i = 0; $i < 7; ++$i ) {
+					if ( 1 === ( $weekly_shift & ( 1 << $i ) ) ) {
+						$add_day = $i + 1;
+						break;
 					}
-
-					$do = sprintf( '%02d', $do );
-
-					return "{$do_time} {$now_hour}:{$do}";
 				}
 			}
 
-			return false;
+			$interval_add  = new DateInterval( "P{$interval->m}M{$add_day}D" );
+			$next_datetime = $now->setTime( $interval->h, $interval->i )->add( $interval_add );
+
+			return $next_datetime->format( $format );
 		}
 
-		if ( 0 < $month || 0 < $week ) {
-			// for month, week
-			$dotw         = $this->parse_dotw( $week );
-			$dotw_arr     = array( '日', '月', '火', '水', '木', '金', '土' );
-			$current_dotw = $dotw_arr[ date( 'w' ) ];
-
-			if ( ! in_array( $current_dotw, $dotw, true ) || $hour !== $now_hour || ( 0 < $month && 0 !== $now_month % $month ) ) {
-				return false;
-			}
-		} else {
-			// for day, hour
-			if ( 0 !== $now_hour % $hour ) {
-				return false;
-			}
-		}
-
-		// for month, week, day, hour
-		if ( $now_minute <= $minute && $minute < $now_minute + $this->minute_span ) {
-			return "{$do_time} {$now_hour}:{$minute}";
-		}
-
-		return false;
+		return '';
 	}
 
 	/**
@@ -289,8 +261,9 @@ class PS_OpenRPA_API_Method {
 
 			$do_times = array();
 			foreach ( $schedules as $schedule ) {
-				$next = $this->calc_next_schedule( $schedule['format'], $now );
-				if ( false === $next ) {
+				$next = $this->calc_next_schedule( $schedule['format'], $post_date_gmt );
+
+				if ( '' === $next ) {
 					continue;
 				}
 				array_push( $do_times, $next );
