@@ -59,7 +59,7 @@ function ps_openrpa_check_taskname( $user_id, $name ) {
 }
 
 // タスク登録
-function ps_openrpa_add_task( $user_id, $now, $task_name, $command ) {
+function ps_openrpa_add_task( $user_id, $task_name, $command ) {
 	if ( ! check_admin_referer( 'openrpa_task' ) ) {
 		return false;
 	}
@@ -71,12 +71,14 @@ function ps_openrpa_add_task( $user_id, $now, $task_name, $command ) {
 		return false;
 	}
 
+	$timezone  = new \DateTimeZone( \DateTimeZone::UTC );
+	$now       = new \DateTimeImmutable( 'now', $timezone );
 	$post_content = array(
 		'name'    => $task_name,
 		'command' => $command,
 	);
 	$post_args    = array(
-		'post_title'   => "{$user_id}_{$now}",
+		'post_title'   => $user_id . $now->format( '_Ymd_His' ),
 		'post_content' => wp_json_encode( $post_content, JSON_UNESCAPED_UNICODE ),
 		'post_type'    => 'task',
 		'post_author'  => $user_id,
@@ -229,7 +231,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
 	if ( isset( $post_sanitize['command'] ) && isset( $post_sanitize['schedule'] ) && ! ps_openrpa_error_check( $post_sanitize ) ) {
 		$command   = $post_sanitize['command'];
 		$task_name = $post_sanitize['task_name'];
-		$post_id   = ps_openrpa_add_task( $user->ID, date( 'Ymd_His' ), $task_name, $command );
+		$post_id   = ps_openrpa_add_task( $user->ID, $task_name, $command );
 
 		if ( $post_id ) {
 			$postmeta_id = ps_openrpa_add_schedule( $post_id, $post_sanitize );

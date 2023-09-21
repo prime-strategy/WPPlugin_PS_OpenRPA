@@ -241,8 +241,6 @@ class PS_OpenRPA_API_Method {
 	 * @return array
 	 */
 	public function get_user_task( $user_id ) {
-		$timezone = new \DateTimeZone( get_option( 'timezone_string' ) );
-		$now      = new \DateTimeImmutable( 'now', $timezone );
 		$response = array();
 		$posts    = get_posts(
 			array(
@@ -253,7 +251,8 @@ class PS_OpenRPA_API_Method {
 			)
 		);
 
-		date_default_timezone_set( $timezone->getName() );
+		$timezone      = new \DateTimeZone( \DateTimeZone::UTC );
+		$post_date_gmt = new \DateTimeImmutable( $post->post_date_gmt, $timezone );
 
 		foreach ( $posts as $post ) {
 			$task_obj  = json_decode( $post->post_content );
@@ -391,7 +390,8 @@ class PS_OpenRPA_API_Method {
 	public function add_complete_task( $user_id ) {
 		$json = file_get_contents( 'php://input' );
 		$arr  = json_decode( $json, true );
-		$now  = date( 'Ymd_His' );
+		$timezone = new \DateTimeZone( \DateTimeZone::UTC );
+		$now      = new \DateTimeImmutable( 'now', $timezone );
 
 		$data = array(
 			'id'      => $arr['id'] ?? 0,
@@ -404,7 +404,7 @@ class PS_OpenRPA_API_Method {
 		);
 
 		$post_array = array(
-			'post_title'   => $user_id . '_' . $now,
+			'post_title'   => $user_id . $now->format( '_Ymd_His' ),
 			'post_type'    => 'result',
 			'post_content' => wp_json_encode( $data, JSON_UNESCAPED_UNICODE ),
 			'post_status'  => 'publish',
