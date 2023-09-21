@@ -267,11 +267,9 @@ class PS_OpenRPA_API_Method {
 			foreach ( $schedules as $schedule ) {
 				$next = $this->calc_next_schedule( $schedule['format'], $post_date_gmt );
 
-				if ( '' === $next ) {
-					continue;
+				if ( '' !== $next ) {
+					$do_times[] = $next;
 				}
-
-				$do_times[] = $next;
 			}
 
 			if ( array() === $do_times ) {
