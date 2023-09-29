@@ -22,8 +22,6 @@ class PS_OpenRPA_Admin {
 
 	/**
 	 * Enqueue Needed Styles Or Scripts Library
-	 *
-	 * @access public
 	 */
 	public function enqueue() {
 		wp_enqueue_script( 'jquery-js', plugins_url( 'assets/js/lib/bootstrap.min.js', __DIR__ ), array(), '5.3.0' );
@@ -36,8 +34,6 @@ class PS_OpenRPA_Admin {
 
 	/**
 	 * Added Setting Menu Page
-	 *
-	 * @access public
 	 */
 	public function admin_menu() {
 		add_menu_page(
@@ -70,8 +66,6 @@ class PS_OpenRPA_Admin {
 
 	/**
 	 * Load Main Page
-	 *
-	 * @access public
 	 */
 	public function load_main_page() {
 		include_once PS_OPENRPA_PATH . 'templates/top.php';
@@ -79,8 +73,6 @@ class PS_OpenRPA_Admin {
 
 	/**
 	 * Load Task Registration Page
-	 *
-	 * @access public
 	 */
 	public function load_task_page() {
 		include_once PS_OPENRPA_PATH . 'templates/task.php';
@@ -88,8 +80,6 @@ class PS_OpenRPA_Admin {
 
 	/**
 	 * Load History Page
-	 *
-	 * @access public
 	 */
 	public function load_history_page() {
 		include_once PS_OPENRPA_PATH . 'templates/history.php';

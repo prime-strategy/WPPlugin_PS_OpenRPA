@@ -21,22 +21,20 @@ include_once PS_OPENRPA_PATH . 'includes/DateIntervalExtend.php';
 class PS_OpenRPA_API_Method {
 	/**
 	 * Task 実行 JSON データフォーマットの保存バージョン
+	 *
+	 * @var string
 	 */
 	const PS_OPENRPA_COMPLETE_TASK_JSON_VERSION = 1.0;
 
 	/**
 	 * Save Base Token Path
-	 *
-	 * @var string
 	 */
-	private $base_token_path = '/tmp';
+	private string $base_token_path = '/tmp';
 
 	/**
 	 * End Name Of Token File
-	 *
-	 * @var string
 	 */
-	private $token_end_name = '_session.txt';
+	private string $token_end_name = '_session.txt';
 
 	/**
 	 * In Schedule, Allowed Minute Span
@@ -48,24 +46,18 @@ class PS_OpenRPA_API_Method {
 	/**
 	 * Get Request Method
 	 *
-	 * @access public
-	 *
 	 * @return string $method Request Method
 	 */
-	public function get_request_method() {
+	public function get_request_method(): string {
 		return sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) );
 	}
 
 	/**
 	 * Create Token
 	 *
-	 * @access public
-	 *
-	 * @param string $user_id
-	 *
-	 * @return string $token
+	 * @param $user_id
 	 */
-	public function create_token( $user_id ) {
+	public function create_token( string $user_id ): string {
 		do {
 			$token      = bin2hex( random_bytes( 32 ) );
 			$token_file = $this->get_token_filepath( $token );
@@ -85,14 +77,10 @@ class PS_OpenRPA_API_Method {
 	/**
 	 * Check Token Is Correct Or InCorrect Or Expired
 	 *
-	 * @access public
-	 *
-	 * @param string $token
-	 * @param string $user_id
-	 *
-	 * @return boolean
+	 * @param $token
+	 * @param $user_id
 	 */
-	public function check_token( $token, $user_id ) {
+	public function check_token( string $token, string $user_id ): bool {
 		$token_file = $this->get_token_filepath( $token );
 
 		if ( is_readable( $token_file ) ) {
@@ -109,13 +97,9 @@ class PS_OpenRPA_API_Method {
 	/**
 	 * Check Header Args
 	 *
-	 * @access public
-	 *
-	 * @param array $args In Header Args
-	 *
-	 * @return boolean
+	 * @param string[] $args In Header Args
 	 */
-	public function check_header( $args ) {
+	public function check_header( array $args ): bool {
 		foreach ( $args as $arg ) {
 			if ( ! array_key_exists( "HTTP_{$arg}", $_SERVER ) ) {
 				return false;
@@ -127,10 +111,6 @@ class PS_OpenRPA_API_Method {
 
 	/**
 	 * Get Token In Header
-	 *
-	 * @access public
-	 *
-	 * @return boolean|string $token if not set return false
 	 */
 	public function get_token_in_header() {
 		$token = sanitize_text_field( wp_unslash( $_SERVER['HTTP_TOKEN'] ?? '' ) );
@@ -144,12 +124,8 @@ class PS_OpenRPA_API_Method {
 
 	/**
 	 * Check Logged In And Application Key
-	 *
-	 * @access public
-	 *
-	 * @return boolean
 	 */
-	public function check_user_and_key() {
+	public function check_user_and_key(): bool {
 		$username = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USERNAME'] ?? '' ) );
 		$key      = sanitize_text_field( wp_unslash( $_SERVER['HTTP_APPLICATIONKEY'] ?? '' ) );
 
@@ -239,13 +215,11 @@ class PS_OpenRPA_API_Method {
 	/**
 	 * Get User Task
 	 *
-	 * @access public
+	 * @param $user_id Requested User Id
 	 *
-	 * @param string $user_id Requested User Id
-	 *
-	 * @return array
+	 * @return mixed[]
 	 */
-	public function get_user_task( $user_id ) {
+	public function get_user_task( string $user_id ): array {
 		$response = array();
 		$posts    = get_posts(
 			array(
@@ -289,14 +263,8 @@ class PS_OpenRPA_API_Method {
 
 	/**
 	 * Add User Task
-	 *
-	 * @access public
-	 *
-	 * @param string $user_id Requested User Id
-	 *
-	 * @return array
 	 */
-	public function add_user_task( $user_id ) {
+	public function add_user_task(): WP_Error {
 		// Not yet implemented
 		$error = new PS_OpenRPA_API_Error();
 
@@ -306,15 +274,8 @@ class PS_OpenRPA_API_Method {
 
 	/**
 	 * Update User Task
-	 *
-	 * @access public
-	 *
-	 * @param string $user_id Requested User Id
-	 * @param string $task_id Requested Task Id
-	 *
-	 * @return array
 	 */
-	public function update_user_task( $user_id, $task_id ) {
+	public function update_user_task(): WP_Error {
 		// Not yet implemented
 		$error = new PS_OpenRPA_API_Error();
 
@@ -324,14 +285,9 @@ class PS_OpenRPA_API_Method {
 	/**
 	 * Delete User Task
 	 *
-	 * @access public
-	 *
-	 * @param string $user_id Requested User Id
-	 * @param string $task_id Requested Task Id
-	 *
-	 * @return array
+	 * @param $task_id Requested Task Id
 	 */
-	public function delete_user_task( $user_id, $task_id ) {
+	public function delete_user_task( string $task_id ) {
 		wp_update_post(
 			array(
 				'ID'          => $task_id,
@@ -343,13 +299,11 @@ class PS_OpenRPA_API_Method {
 	/**
 	 * Get Completed Task
 	 *
-	 * @access public
+	 * @param $user_id Requested User Id
 	 *
-	 * @param string $user_id Requested User Id
-	 *
-	 * @return array
+	 * @return mixed[]
 	 */
-	public function get_complete_task( $user_id ) {
+	public function get_complete_task( string $user_id ): array {
 		$response = array();
 		$posts    = get_posts(
 			array(
@@ -381,11 +335,9 @@ class PS_OpenRPA_API_Method {
 	/**
 	 * Add Completed Task
 	 *
-	 * @access public
+	 * @param $user_id Requested User Id
 	 *
-	 * @param string $user_id Requested User Id
-	 *
-	 * @return array
+	 * @return mixed[]
 	 */
 	public function add_complete_task( $user_id ) {
 		$timezone = new \DateTimeZone( \DateTimeZone::UTC );

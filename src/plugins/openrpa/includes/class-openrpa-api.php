@@ -35,17 +35,13 @@ class PS_OpenRPA_API {
 
 	/**
 	 * PS OpenRPA Method Variable
-	 *
-	 * @var null|object
 	 */
-	private $Method = null;
+	private \PS_OpenRPA_API_Method $Method;
 
 	/**
 	 * PS OpenRPA Error Variable
-	 *
-	 * @var null|object
 	 */
-	private $Error = null;
+	private \PS_OpenRPA_API_Error $Error;
 
 	/**
 	 * Initialize Constants And API Hooks
@@ -59,8 +55,6 @@ class PS_OpenRPA_API {
 
 	/**
 	 * Define PS OpenRPA API Constants
-	 *
-	 * @access private
 	 */
 	private function define_constants() {
 		$this->define( 'PS_OPENRPA_API_ENDPOINT', $this->API_ENDPOINT_PREFIX_NAME . '/' . $this->API_VERSION );
@@ -70,12 +64,10 @@ class PS_OpenRPA_API {
 	/**
 	 * Define Constants Only If Not Set
 	 *
-	 * @access private
-	 *
-	 * @param string $name Constant Name
-	 * @param string|bool $value Constant Value
+	 * @param $name Constant Name
+	 * @param $value Constant Value
 	 */
-	private function define( $name, $value ) {
+	private function define( string $name, bool|string $value ) {
 		if ( ! defined( $name ) ) {
 			define( $name, $value );
 		}
@@ -83,8 +75,6 @@ class PS_OpenRPA_API {
 
 	/**
 	 * Enqueue Needed EndPoint
-	 *
-	 * @access public
 	 */
 	public function enqueue_endpoint() {
 		// Login EndPoint => GET
@@ -134,8 +124,6 @@ class PS_OpenRPA_API {
 
 	/**
 	 * Only Allow PS_OPENRPA_API_ALLOW_USERROLE
-	 *
-	 * @access public
 	 */
 	public function rest_permission() {
 		return current_user_can( PS_OPENRPA_API_ALLOW_USERROLE );
@@ -143,11 +131,6 @@ class PS_OpenRPA_API {
 
 	/**
 	 * Login
-	 *
-	 * @access public
-	 *
-	 * @param string $username In Header
-	 * @param string $application_key In Header
 	 *
 	 * @return object $userId,$token|$message Json Or Failed Message
 	 */
@@ -182,15 +165,11 @@ class PS_OpenRPA_API {
 	/**
 	 * For Get User Task
 	 *
-	 * @access public
+	 * @param mixed[] $request
 	 *
-	 * @param object $request
-	 * -- @param string $token In Header --
-	 * -- @param string $userId In Path   --
-	 *
-	 * @return array $message Success Or Failed Message
+	 * @return mixed[]|WPError $message Success Or Failed Message
 	 */
-	public function task_router( $request ) {
+	public function task_router( array $request ): array|WPError {
 		$method  = $this->Method->get_request_method();
 		$user_id = $request['UserId'];
 
@@ -224,16 +203,11 @@ class PS_OpenRPA_API {
 	/**
 	 * For Update User Task
 	 *
-	 * @access public
+	 * @param mixed[] $request
 	 *
-	 * @param object $request
-	 * -- @param string $token In Header --
-	 * -- @param string $userId In Path   --
-	 * -- @param string $taskId In Path   --
-	 *
-	 * @return array $message Success Or Failed Message
+	 * @return mixed[]|WPError $message Success Or Failed Message
 	 */
-	public function modify_router( $request ) {
+	public function modify_router( array $request ): array|WPError {
 		$method  = $this->Method->get_request_method();
 		$user_id = $request['UserId'];
 		$task_id = $request['TaskId'];
@@ -268,15 +242,11 @@ class PS_OpenRPA_API {
 	/**
 	 * For Completed Task
 	 *
-	 * @access public
+	 * @param mixed[] $request
 	 *
-	 * @param object $request
-	 * -- @param string $token In Header --
-	 * -- @param string $userId In Path   --
-	 *
-	 * @return array $message Success Or Failed Message
+	 * @return mixed[]|WPError $message Success Or Failed Message
 	 */
-	public function complete_router( $request ) {
+	public function complete_router( array $request ): array|WPError {
 		$method  = $this->Method->get_request_method();
 		$user_id = $request['UserId'];
 

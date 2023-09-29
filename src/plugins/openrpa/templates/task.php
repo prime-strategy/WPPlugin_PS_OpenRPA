@@ -9,6 +9,8 @@ if ( ! defined( 'PS_OPENRPA_SCHEDULE_KEY' ) ) {
 
 /**
  * Task 設定 JSON データフォーマットの保存バージョン
+ * 
+ * @var string
  */
 const PS_OPENRPA_TASK_JSON_VERSION = 1.0;
 
