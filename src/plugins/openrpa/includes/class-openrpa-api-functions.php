@@ -11,61 +11,51 @@ if ( ! class_exists( 'PS_OpenRPA_API_Error' ) ) {
 	include_once PS_OPENRPA_PATH . 'includes/class-openrpa-api-errors.php';
 }
 
-include_once PS_OPENRPA_PATH . 'includes/DateIntervalExtend.php';
+require_once PS_OPENRPA_PATH . 'includes/DateIntervalExtend.php';
 
 /**
  * PS OpenRPA API Method Class
  *
  * Using From PS_OpenRPA_API Class
  */
-class PS_OpenRPA_API_Method {
+final class PS_OpenRPA_API_Method {
 	/**
 	 * Task 実行 JSON データフォーマットの保存バージョン
+	 *
+	 * @var string
 	 */
-	const PS_OPENRPA_COMPLETE_TASK_JSON_VERSION = 1.0;
+	private const PS_OPENRPA_COMPLETE_TASK_JSON_VERSION = '1.0';
 
 	/**
 	 * Save Base Token Path
-	 *
-	 * @var string
 	 */
-	private $base_token_path = '/tmp';
+	private string $base_token_path = '/tmp';
 
 	/**
 	 * End Name Of Token File
-	 *
-	 * @var string
 	 */
-	private $token_end_name = '_session.txt';
+	private string $token_end_name = '_session.txt';
 
-	/**
-	 * In Schedule, Allowed Minute Span
-	 *
-	 * @var integer
-	 */
-	private $minute_span = 5;
+	// /**
+	//  * In Schedule, Allowed Minute Span
+	//  */
+	// private int $minute_span = 5;
 
 	/**
 	 * Get Request Method
 	 *
-	 * @access public
-	 *
 	 * @return string $method Request Method
 	 */
-	public function get_request_method() {
+	public function get_request_method(): string {
 		return sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) );
 	}
 
 	/**
 	 * Create Token
 	 *
-	 * @access public
-	 *
-	 * @param string $user_id
-	 *
-	 * @return string $token
+	 * @param $user_id
 	 */
-	public function create_token( $user_id ) {
+	public function create_token( string $user_id ): string {
 		do {
 			$token      = bin2hex( random_bytes( 32 ) );
 			$token_file = $this->get_token_filepath( $token );
@@ -78,21 +68,17 @@ class PS_OpenRPA_API_Method {
 		return $token;
 	}
 
-	private function get_token_filepath( $token ) {
-		return "{$this->base_token_path}/{$token}{$this->token_end_name}";
+	private function get_token_filepath( string $token ): string {
+		return $this->base_token_path . '/' . $token . $this->token_end_name;
 	}
 
 	/**
 	 * Check Token Is Correct Or InCorrect Or Expired
 	 *
-	 * @access public
-	 *
-	 * @param string $token
-	 * @param string $user_id
-	 *
-	 * @return boolean
+	 * @param $token
+	 * @param $user_id
 	 */
-	public function check_token( $token, $user_id ) {
+	public function check_token( string $token, string $user_id ): bool {
 		$token_file = $this->get_token_filepath( $token );
 
 		if ( is_readable( $token_file ) ) {
@@ -109,15 +95,11 @@ class PS_OpenRPA_API_Method {
 	/**
 	 * Check Header Args
 	 *
-	 * @access public
-	 *
-	 * @param array $args In Header Args
-	 *
-	 * @return boolean
+	 * @param string[] $args In Header Args
 	 */
-	public function check_header( $args ) {
+	public function check_header( array $args ): bool {
 		foreach ( $args as $arg ) {
-			if ( ! array_key_exists( "HTTP_{$arg}", $_SERVER ) ) {
+			if ( ! isset( $_SERVER[ 'HTTP_' . $arg ] ) ) {
 				return false;
 			}
 		}
@@ -127,29 +109,15 @@ class PS_OpenRPA_API_Method {
 
 	/**
 	 * Get Token In Header
-	 *
-	 * @access public
-	 *
-	 * @return boolean|string $token if not set return false
 	 */
-	public function get_token_in_header() {
-		$token = sanitize_text_field( wp_unslash( $_SERVER['HTTP_TOKEN'] ?? '' ) );
-
-		if ( '' === $token ) {
-			return false;
-		}
-
-		return $token;
+	public function get_token_in_header(): string {
+		return sanitize_text_field( wp_unslash( $_SERVER['HTTP_TOKEN'] ?? '' ) );
 	}
 
 	/**
 	 * Check Logged In And Application Key
-	 *
-	 * @access public
-	 *
-	 * @return boolean
 	 */
-	public function check_user_and_key() {
+	public function check_user_and_key(): bool {
 		$username = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USERNAME'] ?? '' ) );
 		$key      = sanitize_text_field( wp_unslash( $_SERVER['HTTP_APPLICATIONKEY'] ?? '' ) );
 
@@ -233,13 +201,11 @@ class PS_OpenRPA_API_Method {
 	/**
 	 * Get User Task
 	 *
-	 * @access public
+	 * @param $user_id Requested User Id
 	 *
-	 * @param string $user_id Requested User Id
-	 *
-	 * @return array
+	 * @return mixed[]
 	 */
-	public function get_user_task( $user_id ) {
+	public function get_user_task( string $user_id ): array {
 		$response = array();
 		$posts    = get_posts(
 			array(
@@ -249,14 +215,13 @@ class PS_OpenRPA_API_Method {
 				'posts_per_page' => -1,
 			)
 		);
-
-		$timezone      = new \DateTimeZone( \DateTimeZone::UTC );
-		$post_date_gmt = new \DateTimeImmutable( $post->post_date_gmt, $timezone );
+		$timezone = new \DateTimeZone( 'UTC' );
 
 		foreach ( $posts as $post ) {
-			$task_obj  = json_decode( $post->post_content );
-			$schedules = get_post_meta( $post->ID, '_schedule_time' );
-			$do_times  = array();
+			$post_date_gmt = new \DateTimeImmutable( $post->post_date_gmt, $timezone );
+			$task_obj      = json_decode( $post->post_content, null, 512, JSON_THROW_ON_ERROR );
+			$schedules     = get_post_meta( $post->ID, '_schedule_time' );
+			$do_times      = array();
 
 			foreach ( $schedules as $schedule ) {
 				$next = $this->calc_next_schedule( $schedule['format'], $post_date_gmt );
@@ -266,16 +231,14 @@ class PS_OpenRPA_API_Method {
 				}
 			}
 
-			if ( array() === $do_times ) {
-				continue;
+			if ( array() !== $do_times ) {
+				$response[] = array(
+					'id'       => $post->ID,
+					'name'     => $task_obj->name,
+					'command'  => $task_obj->command,
+					'schedule' => array_unique( $do_times ),
+				);
 			}
-
-			$response[] = array(
-				'id'       => $post->ID,
-				'name'     => $task_obj->name,
-				'command'  => $task_obj->command,
-				'schedule' => array_unique( $do_times ),
-			);
 		}
 
 		return $response;
@@ -283,14 +246,8 @@ class PS_OpenRPA_API_Method {
 
 	/**
 	 * Add User Task
-	 *
-	 * @access public
-	 *
-	 * @param string $user_id Requested User Id
-	 *
-	 * @return array
 	 */
-	public function add_user_task( $user_id ) {
+	public function add_user_task(): WP_Error {
 		// Not yet implemented
 		$error = new PS_OpenRPA_API_Error();
 
@@ -300,15 +257,8 @@ class PS_OpenRPA_API_Method {
 
 	/**
 	 * Update User Task
-	 *
-	 * @access public
-	 *
-	 * @param string $user_id Requested User Id
-	 * @param string $task_id Requested Task Id
-	 *
-	 * @return array
 	 */
-	public function update_user_task( $user_id, $task_id ) {
+	public function update_user_task(): WP_Error {
 		// Not yet implemented
 		$error = new PS_OpenRPA_API_Error();
 
@@ -318,14 +268,9 @@ class PS_OpenRPA_API_Method {
 	/**
 	 * Delete User Task
 	 *
-	 * @access public
-	 *
-	 * @param string $user_id Requested User Id
-	 * @param string $task_id Requested Task Id
-	 *
-	 * @return array
+	 * @param $task_id Requested Task Id
 	 */
-	public function delete_user_task( $user_id, $task_id ) {
+	public function delete_user_task( string $task_id ) {
 		wp_update_post(
 			array(
 				'ID'          => $task_id,
@@ -337,13 +282,11 @@ class PS_OpenRPA_API_Method {
 	/**
 	 * Get Completed Task
 	 *
-	 * @access public
+	 * @param $user_id Requested User Id
 	 *
-	 * @param string $user_id Requested User Id
-	 *
-	 * @return array
+	 * @return mixed[]
 	 */
-	public function get_complete_task( $user_id ) {
+	public function get_complete_task( string $user_id ): array {
 		$response = array();
 		$posts    = get_posts(
 			array(
@@ -355,7 +298,7 @@ class PS_OpenRPA_API_Method {
 		);
 
 		foreach ( $posts as $post ) {
-			$result_obj = json_decode( $post->post_content );
+			$result_obj = json_decode( $post->post_content, null, 512, JSON_THROW_ON_ERROR );
 			$schedules  = get_post_meta( $result_obj->id, '_schedule_time' );
 			$response[] = array(
 				'id'       => $result_obj->id,
@@ -375,20 +318,18 @@ class PS_OpenRPA_API_Method {
 	/**
 	 * Add Completed Task
 	 *
-	 * @access public
+	 * @param $user_id Requested User Id
 	 *
-	 * @param string $user_id Requested User Id
-	 *
-	 * @return array
+	 * @return mixed[]
 	 */
-	public function add_complete_task( $user_id ) {
-		$timezone = new \DateTimeZone( \DateTimeZone::UTC );
+	public function add_complete_task( string $user_id ): array {
+		$timezone = new \DateTimeZone( 'UTC' );
 		$now      = new \DateTimeImmutable( 'now', $timezone );
 		$json     = file_get_contents( 'php://input' );
-		$arr      = json_decode( $json, true );
+		$arr      = json_decode( $json, true, 512, JSON_THROW_ON_ERROR );
 
 		$data = array(
-			'version' => PS_OPENRPA_COMPLETE_TASK_JSON_VERSION,
+			'version' => self::PS_OPENRPA_COMPLETE_TASK_JSON_VERSION,
 			'id'      => $arr['id'] ?? 0,
 			'name'    => $arr['name'] ?? '',
 			'command' => $arr['command'] ?? '',
@@ -398,7 +339,7 @@ class PS_OpenRPA_API_Method {
 			'status'  => $arr['status'] ?? '',
 		);
 
-		$post_id = wp_insert_post(
+		return wp_insert_post(
 			array(
 				'post_title'   => $user_id . $now->format( '_Ymd_His' ),
 				'post_type'    => 'result',
@@ -407,7 +348,5 @@ class PS_OpenRPA_API_Method {
 				'post_author'  => $user_id,
 			)
 		);
-
-		return $post_id;
 	}
 }

@@ -9,8 +9,10 @@ if ( ! defined( 'PS_OPENRPA_SCHEDULE_KEY' ) ) {
 
 /**
  * Task 設定 JSON データフォーマットの保存バージョン
+ * 
+ * @var string
  */
-const PS_OPENRPA_TASK_JSON_VERSION = 1.0;
+const PS_OPENRPA_TASK_JSON_VERSION = '1.0';
 
 // 週
 function ps_openrpa_get_week() {
@@ -52,8 +54,8 @@ function ps_openrpa_check_taskname( $user_id, $name ) {
 	);
 	$posts = get_posts( $args );
 
-	foreach ( $posts as $key => $post ) {
-		$task_obj = json_decode( $post->post_content );
+	foreach ( $posts as $post ) {
+		$task_obj = json_decode( $post->post_content, null, 512, JSON_THROW_ON_ERROR );
 
 		if ( $name === $task_obj->name ) {
 			return false;
@@ -76,24 +78,23 @@ function ps_openrpa_add_task( $user_id, $task_name, $command ) {
 		return false;
 	}
 
-	$timezone  = new \DateTimeZone( \DateTimeZone::UTC );
-	$now       = new \DateTimeImmutable( 'now', $timezone );
+	$timezone     = new \DateTimeZone( 'UTC' );
+	$now          = new \DateTimeImmutable( 'now', $timezone );
 	$post_content = array(
 		'version' => PS_OPENRPA_TASK_JSON_VERSION,
 		'name'    => $task_name,
 		'command' => $command,
 	);
-	$post_args    = array(
-		'post_title'   => $user_id . $now->format( '_Ymd_His' ),
-		'post_content' => wp_json_encode( $post_content, JSON_UNESCAPED_UNICODE ),
-		'post_type'    => 'task',
-		'post_author'  => $user_id,
-		'post_status'  => 'publish',
-	);
 
-	$post_id = wp_insert_post( $post_args );
-
-	return $post_id;
+	return wp_insert_post( 
+		array(
+			'post_title'   => $user_id . $now->format( '_Ymd_His' ),
+			'post_content' => wp_json_encode( $post_content, JSON_UNESCAPED_UNICODE ),
+			'post_type'    => 'task',
+			'post_author'  => $user_id,
+			'post_status'  => 'publish',
+		)
+	 );
 }
 
 // スケジュール登録
@@ -167,7 +168,6 @@ function ps_openrpa_add_schedule( $post_id, $post_sanitize ) {
 			);
 			break;
 		case 'custom':
-			break;
 		default:
 			break;
 	}
@@ -460,8 +460,8 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
 				$max_pages = $query->max_num_pages;
 
 				if ( $query->have_posts() ) {
-					foreach ( $query->posts as $key => $post ) {
-						$task_obj  = json_decode( $post->post_content );
+					foreach ( $query->posts as $post ) {
+						$task_obj  = json_decode( $post->post_content, null, 512, JSON_THROW_ON_ERROR );
 						$schedules = get_post_meta( $post->ID, PS_OPENRPA_SCHEDULE_KEY );
 
 						echo '<tr>';
@@ -491,7 +491,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
 	<div class="row">
 		<div class="col text-end task-pagination">
 			<?php
-			$big             = 9999999;
+			$big             = 9_999_999;
 			$pagination_args = array(
 				'base'      => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
 				'format'    => '?paged=%#%',

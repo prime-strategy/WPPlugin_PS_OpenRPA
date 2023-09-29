@@ -1,7 +1,6 @@
 <?php
 /**
  * PS OpenRPA setup.
- *
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -11,13 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Main PS OpenRPA class
  */
-class PS_OpenRPA {
+final class PS_OpenRPA {
 	/**
 	 * PS OpenRPA Version
-	 *
-	 * @var string
 	 */
-	private $version = '1.0.0';
+	private string $version = '1.0.0';
 
 	/**
 	 * Class Constructor
@@ -29,8 +26,6 @@ class PS_OpenRPA {
 
 	/**
 	 * Define PS OpenRPA Constants
-	 *
-	 * @access private
 	 */
 	private function define_constants() {
 		$this->define( 'PS_OPENRPA_BASENAME', plugin_basename( PS_OPENRPA_FILE ) );
@@ -41,12 +36,10 @@ class PS_OpenRPA {
 	/**
 	 * Define Constant Only If Not Set
 	 *
-	 * @access private
-	 *
-	 * @param string $name Constant Name
-	 * @param string $value Constant Value
+	 * @param $name Constant Name
+	 * @param $value Constant Value
 	 */
-	private function define( $name, $value ) {
+	private function define( string $name, string $value ) {
 		if ( ! defined( $name ) ) {
 			define( $name, $value );
 		}
@@ -54,24 +47,20 @@ class PS_OpenRPA {
 
 	/**
 	 * Include Core Files Used In Front
-	 *
-	 * @access private
 	 */
 	private function include_classes() {
 		$this->include( 'PS_OpenRPA_API', 'includes/class-openrpa-api.php' );
 		$this->include( 'PS_OpenRPA_Admin', 'admin/class-openrpa-admin.php' );
-		//$this->include( 'PS_OpenRPA_Time_Scheduler', 'includes/class-openrpa-scheduler.php' );
+		// $this->include( 'PS_OpenRPA_Time_Scheduler', 'includes/class-openrpa-scheduler.php' );
 	}
 
 	/**
 	 * Include Classes Only If Not Set
 	 *
-	 * @param string $name Class Name
-	 * @param string $path Class File Path
-	 *
-	 * @access private
+	 * @param $name Class Name
+	 * @param $path Class File Path
 	 */
-	private function include( $name, $path ) {
+	private function include( string $name, string $path ) {
 		if ( ! class_exists( $name ) ) {
 			include_once PS_OPENRPA_PATH . $path;
 		}
