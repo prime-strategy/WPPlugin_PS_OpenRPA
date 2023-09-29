@@ -57,7 +57,7 @@ final class PS_OpenRPA_API {
 	 * Define PS OpenRPA API Constants
 	 */
 	private function define_constants() {
-		$this->define( 'PS_OPENRPA_API_ENDPOINT', $this->API_ENDPOINT_PREFIX_NAME . '/' . $this->API_VERSION );
+		$this->define( 'PS_OPENRPA_API_ENDPOINT', self::API_ENDPOINT_PREFIX_NAME . '/' . self::API_VERSION );
 		$this->define( 'PS_OPENRPA_API_ALLOW_USERROLE', 'administrator' );
 	}
 
@@ -133,11 +133,11 @@ final class PS_OpenRPA_API {
 	 *
 	 * @return object $userId,$token|$message Json Or Failed Message
 	 */
-	public function login( $request ) {
+	public function login() {
 		$method = $this->Method->get_request_method();
 
 		// method is not GET ... Maybe Unneeded
-		if ( $method !== 'GET' ) {
+		if ( 'GET' !== $method ) {
 			return $this->Error->Error_405();
 		}
 
@@ -173,13 +173,14 @@ final class PS_OpenRPA_API {
 		$user_id = $request['UserId'];
 
 		// method is not GET or POST ... Maybe Unneeded
-		if ( $method !== 'GET' && $method !== 'POST' ) {
+		if ( 'GET' !== $method && 'POST' !== $method ) {
 			return $this->Error->Error_405();
 		}
 
 		// get token
 		$token = $this->Method->get_token_in_header();
-		if ( ! $token ) {
+
+		if ( '' === $token ) {
 			return $this->Error->Error_400();
 		}
 
@@ -189,14 +190,11 @@ final class PS_OpenRPA_API {
 		}
 
 		// do process, switching by method
-		switch ( $method ) {
-			case 'GET':
-				return $this->Method->get_user_task( $user_id );
-			case 'POST':
-				return $this->Method->add_user_task( $user_id );
-			default:
-				return $this->Error->Error_500();
-		}
+		return match ( $method ) {
+			'GET' => $this->Method->get_user_task( $user_id ),
+			'POST' => $this->Method->add_user_task(),
+			default => $this->Error->Error_500(),
+		};
 	}
 
 	/**
@@ -212,13 +210,14 @@ final class PS_OpenRPA_API {
 		$task_id = $request['TaskId'];
 
 		// method is not PUT or DELETE ... Maybe Unneeded
-		if ( $method !== 'PUT' && $method !== 'DELETE' ) {
+		if ( 'PUT' !== $method && 'DELETE' !== $method ) {
 			return $this->Error->Error_405();
 		}
 
 		// get token
 		$token = $this->Method->get_token_in_header();
-		if ( ! $token ) {
+
+		if ( '' === $token ) {
 			return $this->Error->Error_400();
 		}
 
@@ -228,14 +227,11 @@ final class PS_OpenRPA_API {
 		}
 
 		// do process, switching by method
-		switch ( $method ) {
-			case 'PUT':
-				return $this->Method->update_user_task( $user_id, $task_id );
-			case 'DELETE':
-				return $this->Method->delete_user_task( $user_id, $task_id );
-			default:
-				return $this->Error->Error_500();
-		}
+		return match ( $method ) {
+			'PUT' => $this->Method->update_user_task(),
+			'DELETE' => $this->Method->delete_user_task( $task_id ),
+			default => $this->Error->Error_500(),
+		};
 	}
 
 	/**
@@ -250,14 +246,14 @@ final class PS_OpenRPA_API {
 		$user_id = $request['UserId'];
 
 		// method is not GET or POST ... Maybe Unneeded
-		if ( $method !== 'GET' && $method !== 'POST' ) {
+		if ( 'GET' !== $method && 'POST' !== $method ) {
 			return $this->Error->Error_405();
 		}
 
 		// get token
 		$token = $this->Method->get_token_in_header();
 
-		if ( ! $token ) {
+		if ( '' === $token ) {
 			return $this->Error->Error_400();
 		}
 
@@ -267,14 +263,11 @@ final class PS_OpenRPA_API {
 		}
 
 		// do process, switching by method
-		switch ( $method ) {
-			case 'GET':
-				return $this->Method->get_complete_task( $user_id );
-			case 'POST':
-				return $this->Method->add_complete_task( $user_id );
-			default:
-				return $this->Error->Error_500();
-		}
+		return match ( $method ) {
+			'GET' => $this->Method->get_complete_task( $user_id ),
+			'POST' => $this->Method->add_complete_task( $user_id ),
+			default => $this->Error->Error_500(),
+		};
 	}
 }
 

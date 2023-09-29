@@ -11,7 +11,7 @@ if ( ! class_exists( 'PS_OpenRPA_API_Error' ) ) {
 	include_once PS_OPENRPA_PATH . 'includes/class-openrpa-api-errors.php';
 }
 
-include_once PS_OPENRPA_PATH . 'includes/DateIntervalExtend.php';
+require_once PS_OPENRPA_PATH . 'includes/DateIntervalExtend.php';
 
 /**
  * PS OpenRPA API Method Class
@@ -99,7 +99,7 @@ final class PS_OpenRPA_API_Method {
 	 */
 	public function check_header( array $args ): bool {
 		foreach ( $args as $arg ) {
-			if ( ! array_key_exists( "HTTP_{$arg}", $_SERVER ) ) {
+			if ( ! isset( $_SERVER[ 'HTTP_' . $arg ] ) ) {
 				return false;
 			}
 		}
@@ -221,14 +221,13 @@ final class PS_OpenRPA_API_Method {
 				'posts_per_page' => -1,
 			)
 		);
-
-		$timezone      = new \DateTimeZone( \DateTimeZone::UTC );
-		$post_date_gmt = new \DateTimeImmutable( $post->post_date_gmt, $timezone );
+		$timezone = new \DateTimeZone( 'UTC' );
 
 		foreach ( $posts as $post ) {
-			$task_obj  = json_decode( $post->post_content );
-			$schedules = get_post_meta( $post->ID, '_schedule_time' );
-			$do_times  = array();
+			$post_date_gmt = new \DateTimeImmutable( $post->post_date_gmt, $timezone );
+			$task_obj      = json_decode( $post->post_content, null, 512, JSON_THROW_ON_ERROR );
+			$schedules     = get_post_meta( $post->ID, '_schedule_time' );
+			$do_times      = array();
 
 			foreach ( $schedules as $schedule ) {
 				$next = $this->calc_next_schedule( $schedule['format'], $post_date_gmt );
@@ -238,16 +237,14 @@ final class PS_OpenRPA_API_Method {
 				}
 			}
 
-			if ( array() === $do_times ) {
-				continue;
+			if ( array() !== $do_times ) {
+				$response[] = array(
+					'id'       => $post->ID,
+					'name'     => $task_obj->name,
+					'command'  => $task_obj->command,
+					'schedule' => array_unique( $do_times ),
+				);
 			}
-
-			$response[] = array(
-				'id'       => $post->ID,
-				'name'     => $task_obj->name,
-				'command'  => $task_obj->command,
-				'schedule' => array_unique( $do_times ),
-			);
 		}
 
 		return $response;
@@ -307,7 +304,7 @@ final class PS_OpenRPA_API_Method {
 		);
 
 		foreach ( $posts as $post ) {
-			$result_obj = json_decode( $post->post_content );
+			$result_obj = json_decode( $post->post_content, null, 512, JSON_THROW_ON_ERROR );
 			$schedules  = get_post_meta( $result_obj->id, '_schedule_time' );
 			$response[] = array(
 				'id'       => $result_obj->id,
@@ -332,10 +329,10 @@ final class PS_OpenRPA_API_Method {
 	 * @return mixed[]
 	 */
 	public function add_complete_task( string $user_id ): array {
-		$timezone = new \DateTimeZone( \DateTimeZone::UTC );
+		$timezone = new \DateTimeZone( 'UTC' );
 		$now      = new \DateTimeImmutable( 'now', $timezone );
 		$json     = file_get_contents( 'php://input' );
-		$arr      = json_decode( $json, true );
+		$arr      = json_decode( $json, true, 512, JSON_THROW_ON_ERROR );
 
 		$data = array(
 			'version' => self::PS_OPENRPA_COMPLETE_TASK_JSON_VERSION,
@@ -348,7 +345,7 @@ final class PS_OpenRPA_API_Method {
 			'status'  => $arr['status'] ?? '',
 		);
 
-		$post_id = wp_insert_post(
+		return wp_insert_post(
 			array(
 				'post_title'   => $user_id . $now->format( '_Ymd_His' ),
 				'post_type'    => 'result',
@@ -357,7 +354,5 @@ final class PS_OpenRPA_API_Method {
 				'post_author'  => $user_id,
 			)
 		);
-
-		return $post_id;
 	}
 }
