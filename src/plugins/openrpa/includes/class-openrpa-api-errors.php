@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit();
 }
 
-class PS_OpenRPA_API_Error {
+final class PS_OpenRPA_API_Error {
 
 	/**
 	 * 400 Error

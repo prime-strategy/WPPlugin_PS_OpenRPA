@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Main PS OpenRPA class
  */
-class PS_OpenRPA {
+final class PS_OpenRPA {
 	/**
 	 * PS OpenRPA Version
 	 */

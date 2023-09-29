@@ -18,13 +18,13 @@ include_once PS_OPENRPA_PATH . 'includes/DateIntervalExtend.php';
  *
  * Using From PS_OpenRPA_API Class
  */
-class PS_OpenRPA_API_Method {
+final class PS_OpenRPA_API_Method {
 	/**
 	 * Task 実行 JSON データフォーマットの保存バージョン
 	 *
 	 * @var string
 	 */
-	const PS_OPENRPA_COMPLETE_TASK_JSON_VERSION = 1.0;
+	private const PS_OPENRPA_COMPLETE_TASK_JSON_VERSION = '1.0';
 
 	/**
 	 * Save Base Token Path
@@ -68,8 +68,8 @@ class PS_OpenRPA_API_Method {
 		return $token;
 	}
 
-	private function get_token_filepath( $token ) {
-		return "{$this->base_token_path}/{$token}{$this->token_end_name}";
+	private function get_token_filepath( string $token ): string {
+		return $this->base_token_path . '/' . $token . $this->token_end_name;
 	}
 
 	/**
@@ -110,14 +110,8 @@ class PS_OpenRPA_API_Method {
 	/**
 	 * Get Token In Header
 	 */
-	public function get_token_in_header() {
-		$token = sanitize_text_field( wp_unslash( $_SERVER['HTTP_TOKEN'] ?? '' ) );
-
-		if ( '' === $token ) {
-			return false;
-		}
-
-		return $token;
+	public function get_token_in_header(): string {
+		return sanitize_text_field( wp_unslash( $_SERVER['HTTP_TOKEN'] ?? '' ) );
 	}
 
 	/**
@@ -337,14 +331,14 @@ class PS_OpenRPA_API_Method {
 	 *
 	 * @return mixed[]
 	 */
-	public function add_complete_task( $user_id ) {
+	public function add_complete_task( string $user_id ): array {
 		$timezone = new \DateTimeZone( \DateTimeZone::UTC );
 		$now      = new \DateTimeImmutable( 'now', $timezone );
 		$json     = file_get_contents( 'php://input' );
 		$arr      = json_decode( $json, true );
 
 		$data = array(
-			'version' => PS_OPENRPA_COMPLETE_TASK_JSON_VERSION,
+			'version' => self::PS_OPENRPA_COMPLETE_TASK_JSON_VERSION,
 			'id'      => $arr['id'] ?? 0,
 			'name'    => $arr['name'] ?? '',
 			'command' => $arr['command'] ?? '',

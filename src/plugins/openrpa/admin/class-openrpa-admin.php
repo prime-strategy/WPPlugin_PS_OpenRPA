@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Admin Menu Class
  */
-class PS_OpenRPA_Admin {
+final class PS_OpenRPA_Admin {
 
 	/**
 	 * Initializes WordPress Hooks

@@ -18,20 +18,20 @@ if ( ! class_exists( 'PS_OpenRPA_API_Error' ) ) {
 /**
  * PS OpenRPA API Class
  */
-class PS_OpenRPA_API {
+final class PS_OpenRPA_API {
 	/**
 	 * PS OpenRPA Version
 	 *
 	 * @var string
 	 */
-	private $API_VERSION = 'v1';
+	private const API_VERSION = 'v1';
 
 	/**
 	 * PS OpenRPA Endpoint Prefix
 	 *
 	 * @var string
 	 */
-	private $API_ENDPOINT_PREFIX_NAME = 'openrpa';
+	private const API_ENDPOINT_PREFIX_NAME = 'openrpa';
 
 	/**
 	 * PS OpenRPA Method Variable
