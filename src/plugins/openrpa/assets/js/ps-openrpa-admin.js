@@ -353,15 +353,21 @@ window.onload = function () {
 	let radios = Array.from(radio);
 	for (let i = 0; i < radios.length; i++) {
 		radios[i].addEventListener('change', changeScheduleType);
+
+		if (i === 0) {
+			radios[0].dispatchEvent(ev);
+		}
 	}
-	radios[0].dispatchEvent(ev);
 
 	const modalRadio = document.getElementsByClassName('modal_schedule');
 	let modalRadios = Array.from(modalRadio);
 	for (let i = 0; i < modalRadios.length; i++) {
 		modalRadios[i].addEventListener('change', changeModalScheduleType);
+
+		if (i === 0) {
+			modalRadios[0].dispatchEvent(ev);
+		}
 	}
-	modalRadios[0].dispatchEvent(ev);
 
 	const add = document.getElementsByClassName('add');
 	let adds = Array.from(add);
