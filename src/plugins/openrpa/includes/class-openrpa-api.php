@@ -94,22 +94,21 @@ class PS_OpenRPA_API {
 			array(
 				'methods'  => array( 'GET', 'POST' ),
 				'callback' => array( $this, 'task_router' ),
-				//'permission_callback' => array( $this, 'rest_permission' ),
+				// 'permission_callback' => array( $this, 'rest_permission' ),
 			),
 		);
 
 		// User Task PUT DELETE EndPoint => PUT, POST
-		/*
-		register_rest_route(
-			PS_OPENRPA_API_ENDPOINT,
-			'/user/(?P<UserId>[\d]+)/task/(?P<TaskId>[\d]+)',
-			array(
-				'methods' => array( 'PUT', 'DELETE' ),
-				'callback' => array( $this, 'modify_router' ),
-				//'permission_callback' => array( $this, 'rest_permission' ),
-			),
-		);
-		*/
+		// register_rest_route(
+		// 	PS_OPENRPA_API_ENDPOINT,
+		// 	'/user/(?P<UserId>[\d]+)/task/(?P<TaskId>[\d]+)',
+		// 	array(
+		// 		'methods' => array( 'PUT', 'DELETE' ),
+		// 		'callback' => array( $this, 'modify_router' ),
+		// 		// 'permission_callback' => array( $this, 'rest_permission' ),
+		// 	),
+		// );
+
 		// Completed Task GET POST EndPoint => GET, POST
 		register_rest_route(
 			PS_OPENRPA_API_ENDPOINT,
@@ -117,7 +116,7 @@ class PS_OpenRPA_API {
 			array(
 				'methods'  => array( 'GET', 'POST' ),
 				'callback' => array( $this, 'complete_router' ),
-				//'permission_callback' => array( $this, 'rest_permission' ),
+				// 'permission_callback' => array( $this, 'rest_permission' ),
 			)
 		);
 	}

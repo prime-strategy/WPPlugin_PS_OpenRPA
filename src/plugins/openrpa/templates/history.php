@@ -62,6 +62,7 @@ if ( function_exists( 'wp_get_current_user' ) ) {
 								$schedules_tag .= '<br>' . $schedule['description'];
 							}
 						}
+
 						echo '<tr>';
 						echo '<td class="align-middle">' . esc_html( $result_obj->name ) . '</td>';
 						echo '<td class="align-middle">' . esc_html( $result_obj->start ) . '</td>';

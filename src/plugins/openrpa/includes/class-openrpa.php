@@ -1,7 +1,6 @@
 <?php
 /**
  * PS OpenRPA setup.
- *
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -52,7 +51,7 @@ class PS_OpenRPA {
 	private function include_classes() {
 		$this->include( 'PS_OpenRPA_API', 'includes/class-openrpa-api.php' );
 		$this->include( 'PS_OpenRPA_Admin', 'admin/class-openrpa-admin.php' );
-		//$this->include( 'PS_OpenRPA_Time_Scheduler', 'includes/class-openrpa-scheduler.php' );
+		// $this->include( 'PS_OpenRPA_Time_Scheduler', 'includes/class-openrpa-scheduler.php' );
 	}
 
 	/**

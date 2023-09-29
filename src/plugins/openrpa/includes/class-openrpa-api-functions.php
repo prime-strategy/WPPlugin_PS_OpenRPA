@@ -36,12 +36,10 @@ class PS_OpenRPA_API_Method {
 	 */
 	private string $token_end_name = '_session.txt';
 
-	/**
-	 * In Schedule, Allowed Minute Span
-	 *
-	 * @var integer
-	 */
-	private $minute_span = 5;
+	// /**
+	//  * In Schedule, Allowed Minute Span
+	//  */
+	// private int $minute_span = 5;
 
 	/**
 	 * Get Request Method

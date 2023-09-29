@@ -4,7 +4,6 @@
  * Description: OpenRPA連携プラグイン
  * Version: 1.0.0
  * Author: Prime Strategy Co.,Ltd.
- *
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

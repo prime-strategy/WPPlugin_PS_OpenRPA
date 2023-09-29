@@ -49,7 +49,7 @@ class PS_OpenRPA_Admin {
 			'ps-openrpa', // parent slug
 			'タスク登録',
 			'タスク登録',
-			'administrator', //role
+			'administrator', // role
 			'ps-openrpa-task',
 			array( $this, 'load_task_page' ),
 		);
