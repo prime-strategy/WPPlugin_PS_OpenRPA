@@ -150,8 +150,8 @@ function ps_openrpa_add_schedule( $post_id, $post_sanitize ) {
 				$post_id,
 				PS_OPENRPA_SCHEDULE_KEY,
 				array(
-					'format'      => "P{$dotw['calc']}WT{$delta['hour']}H{$delta['minute']}M",
-					'description' => "毎週{$dotw['description']}曜日{$delta['hour']}時および{$delta['minute']}分に開始",
+					'format'      => "P{$dotw['calc']}AT{$delta['hour']}H{$delta['minute']}M",
+					'description' => "毎週{$dotw['description']}曜日{$delta['hour']}時{$delta['minute']}分に開始",
 				),
 			);
 			break;
@@ -161,8 +161,8 @@ function ps_openrpa_add_schedule( $post_id, $post_sanitize ) {
 				$post_id,
 				PS_OPENRPA_SCHEDULE_KEY,
 				array(
-					'format'      => "P{$delta['month']}M{$dotw['calc']}WT{$delta['hour']}H{$delta['minute']}M",
-					'description' => "{$delta['month']}カ月ごと毎週{$dotw['description']}曜日および{$delta['hour']}時{$delta['minute']}分に開始",
+					'format'      => "P{$delta['month']}M{$dotw['calc']}AT{$delta['hour']}H{$delta['minute']}M",
+					'description' => "{$delta['month']}カ月ごと毎週{$dotw['description']}曜日 {$delta['hour']}時{$delta['minute']}分に開始",
 				),
 			);
 			break;
