@@ -1,8 +1,13 @@
 name: Plugin asset/readme update
+
+env:
+  SLUG: "PS-OpenRPA"
+
 on:
   push:
     branches:
     - trunk
+
 jobs:
   trunk:
     name: Push to trunk
@@ -14,3 +19,4 @@ jobs:
       env:
         SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
         SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+        SLUG: ${{ env.SLUG }}
