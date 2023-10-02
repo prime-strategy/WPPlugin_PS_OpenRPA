@@ -18,34 +18,30 @@ if ( ! class_exists( 'PS_OpenRPA_API_Error' ) ) {
 /**
  * PS OpenRPA API Class
  */
-class PS_OpenRPA_API {
+final class PS_OpenRPA_API {
 	/**
 	 * PS OpenRPA Version
 	 *
 	 * @var string
 	 */
-	private $API_VERSION = 'v1';
+	private const API_VERSION = 'v1';
 
 	/**
 	 * PS OpenRPA Endpoint Prefix
 	 *
 	 * @var string
 	 */
-	private $API_ENDPOINT_PREFIX_NAME = 'openrpa';
+	private const API_ENDPOINT_PREFIX_NAME = 'openrpa';
 
 	/**
 	 * PS OpenRPA Method Variable
-	 *
-	 * @var null|object
 	 */
-	private $Method = null;
+	private \PS_OpenRPA_API_Method $Method;
 
 	/**
 	 * PS OpenRPA Error Variable
-	 *
-	 * @var null|object
 	 */
-	private $Error = null;
+	private \PS_OpenRPA_API_Error $Error;
 
 	/**
 	 * Initialize Constants And API Hooks
@@ -59,23 +55,19 @@ class PS_OpenRPA_API {
 
 	/**
 	 * Define PS OpenRPA API Constants
-	 *
-	 * @access private
 	 */
 	private function define_constants() {
-		$this->define( 'PS_OPENRPA_API_ENDPOINT', $this->API_ENDPOINT_PREFIX_NAME . '/' . $this->API_VERSION );
+		$this->define( 'PS_OPENRPA_API_ENDPOINT', self::API_ENDPOINT_PREFIX_NAME . '/' . self::API_VERSION );
 		$this->define( 'PS_OPENRPA_API_ALLOW_USERROLE', 'administrator' );
 	}
 
 	/**
 	 * Define Constants Only If Not Set
 	 *
-	 * @access private
-	 *
-	 * @param string $name Constant Name
-	 * @param string|bool $value Constant Value
+	 * @param $name Constant Name
+	 * @param $value Constant Value
 	 */
-	private function define( $name, $value ) {
+	private function define( string $name, bool|string $value ) {
 		if ( ! defined( $name ) ) {
 			define( $name, $value );
 		}
@@ -83,8 +75,6 @@ class PS_OpenRPA_API {
 
 	/**
 	 * Enqueue Needed EndPoint
-	 *
-	 * @access public
 	 */
 	public function enqueue_endpoint() {
 		// Login EndPoint => GET
@@ -104,22 +94,21 @@ class PS_OpenRPA_API {
 			array(
 				'methods'  => array( 'GET', 'POST' ),
 				'callback' => array( $this, 'task_router' ),
-				//'permission_callback' => array( $this, 'rest_permission' ),
+				// 'permission_callback' => array( $this, 'rest_permission' ),
 			),
 		);
 
 		// User Task PUT DELETE EndPoint => PUT, POST
-		/*
-		register_rest_route(
-			PS_OPENRPA_API_ENDPOINT,
-			'/user/(?P<UserId>[\d]+)/task/(?P<TaskId>[\d]+)',
-			array(
-				'methods' => array( 'PUT', 'DELETE' ),
-				'callback' => array( $this, 'modify_router' ),
-				//'permission_callback' => array( $this, 'rest_permission' ),
-			),
-		);
-		*/
+		// register_rest_route(
+		// 	PS_OPENRPA_API_ENDPOINT,
+		// 	'/user/(?P<UserId>[\d]+)/task/(?P<TaskId>[\d]+)',
+		// 	array(
+		// 		'methods' => array( 'PUT', 'DELETE' ),
+		// 		'callback' => array( $this, 'modify_router' ),
+		// 		// 'permission_callback' => array( $this, 'rest_permission' ),
+		// 	),
+		// );
+
 		// Completed Task GET POST EndPoint => GET, POST
 		register_rest_route(
 			PS_OPENRPA_API_ENDPOINT,
@@ -127,15 +116,13 @@ class PS_OpenRPA_API {
 			array(
 				'methods'  => array( 'GET', 'POST' ),
 				'callback' => array( $this, 'complete_router' ),
-				//'permission_callback' => array( $this, 'rest_permission' ),
+				// 'permission_callback' => array( $this, 'rest_permission' ),
 			)
 		);
 	}
 
 	/**
 	 * Only Allow PS_OPENRPA_API_ALLOW_USERROLE
-	 *
-	 * @access public
 	 */
 	public function rest_permission() {
 		return current_user_can( PS_OPENRPA_API_ALLOW_USERROLE );
@@ -144,18 +131,13 @@ class PS_OpenRPA_API {
 	/**
 	 * Login
 	 *
-	 * @access public
-	 *
-	 * @param string $username In Header
-	 * @param string $application_key In Header
-	 *
 	 * @return object $userId,$token|$message Json Or Failed Message
 	 */
-	public function login( $request ) {
+	public function login() {
 		$method = $this->Method->get_request_method();
 
 		// method is not GET ... Maybe Unneeded
-		if ( $method !== 'GET' ) {
+		if ( 'GET' !== $method ) {
 			return $this->Error->Error_405();
 		}
 
@@ -182,26 +164,23 @@ class PS_OpenRPA_API {
 	/**
 	 * For Get User Task
 	 *
-	 * @access public
+	 * @param mixed[] $request
 	 *
-	 * @param object $request
-	 * -- @param string $token In Header --
-	 * -- @param string $userId In Path   --
-	 *
-	 * @return array $message Success Or Failed Message
+	 * @return mixed[]|WPError $message Success Or Failed Message
 	 */
-	public function task_router( $request ) {
+	public function task_router( array $request ): array|WPError {
 		$method  = $this->Method->get_request_method();
 		$user_id = $request['UserId'];
 
 		// method is not GET or POST ... Maybe Unneeded
-		if ( $method !== 'GET' && $method !== 'POST' ) {
+		if ( 'GET' !== $method && 'POST' !== $method ) {
 			return $this->Error->Error_405();
 		}
 
 		// get token
 		$token = $this->Method->get_token_in_header();
-		if ( ! $token ) {
+
+		if ( '' === $token ) {
 			return $this->Error->Error_400();
 		}
 
@@ -211,41 +190,34 @@ class PS_OpenRPA_API {
 		}
 
 		// do process, switching by method
-		switch ( $method ) {
-			case 'GET':
-				return $this->Method->get_user_task( $user_id );
-			case 'POST':
-				return $this->Method->add_user_task( $user_id );
-			default:
-				return $this->Error->Error_500();
-		}
+		return match ( $method ) {
+			'GET' => $this->Method->get_user_task( $user_id ),
+			'POST' => $this->Method->add_user_task(),
+			default => $this->Error->Error_500(),
+		};
 	}
 
 	/**
 	 * For Update User Task
 	 *
-	 * @access public
+	 * @param mixed[] $request
 	 *
-	 * @param object $request
-	 * -- @param string $token In Header --
-	 * -- @param string $userId In Path   --
-	 * -- @param string $taskId In Path   --
-	 *
-	 * @return array $message Success Or Failed Message
+	 * @return mixed[]|WPError $message Success Or Failed Message
 	 */
-	public function modify_router( $request ) {
+	public function modify_router( array $request ): array|WPError {
 		$method  = $this->Method->get_request_method();
 		$user_id = $request['UserId'];
 		$task_id = $request['TaskId'];
 
 		// method is not PUT or DELETE ... Maybe Unneeded
-		if ( $method !== 'PUT' && $method !== 'DELETE' ) {
+		if ( 'PUT' !== $method && 'DELETE' !== $method ) {
 			return $this->Error->Error_405();
 		}
 
 		// get token
 		$token = $this->Method->get_token_in_header();
-		if ( ! $token ) {
+
+		if ( '' === $token ) {
 			return $this->Error->Error_400();
 		}
 
@@ -255,40 +227,33 @@ class PS_OpenRPA_API {
 		}
 
 		// do process, switching by method
-		switch ( $method ) {
-			case 'PUT':
-				return $this->Method->update_user_task( $user_id, $task_id );
-			case 'DELETE':
-				return $this->Method->delete_user_task( $user_id, $task_id );
-			default:
-				return $this->Error->Error_500();
-		}
+		return match ( $method ) {
+			'PUT' => $this->Method->update_user_task(),
+			'DELETE' => $this->Method->delete_user_task( $task_id ),
+			default => $this->Error->Error_500(),
+		};
 	}
 
 	/**
 	 * For Completed Task
 	 *
-	 * @access public
+	 * @param mixed[] $request
 	 *
-	 * @param object $request
-	 * -- @param string $token In Header --
-	 * -- @param string $userId In Path   --
-	 *
-	 * @return array $message Success Or Failed Message
+	 * @return mixed[]|WPError $message Success Or Failed Message
 	 */
-	public function complete_router( $request ) {
+	public function complete_router( array $request ): array|WPError {
 		$method  = $this->Method->get_request_method();
 		$user_id = $request['UserId'];
 
 		// method is not GET or POST ... Maybe Unneeded
-		if ( $method !== 'GET' && $method !== 'POST' ) {
+		if ( 'GET' !== $method && 'POST' !== $method ) {
 			return $this->Error->Error_405();
 		}
 
 		// get token
 		$token = $this->Method->get_token_in_header();
 
-		if ( ! $token ) {
+		if ( '' === $token ) {
 			return $this->Error->Error_400();
 		}
 
@@ -298,14 +263,11 @@ class PS_OpenRPA_API {
 		}
 
 		// do process, switching by method
-		switch ( $method ) {
-			case 'GET':
-				return $this->Method->get_complete_task( $user_id );
-			case 'POST':
-				return $this->Method->add_complete_task( $user_id );
-			default:
-				return $this->Error->Error_500();
-		}
+		return match ( $method ) {
+			'GET' => $this->Method->get_complete_task( $user_id ),
+			'POST' => $this->Method->add_complete_task( $user_id ),
+			default => $this->Error->Error_500(),
+		};
 	}
 }
 

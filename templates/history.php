@@ -50,8 +50,8 @@ if ( function_exists( 'wp_get_current_user' ) ) {
 				$max_pages = $query->max_num_pages;
 
 				if ( $query->have_posts() ) {
-					foreach ( $query->posts as $key => $post ) {
-						$result_obj    = json_decode( $post->post_content );
+					foreach ( $query->posts as $post ) {
+						$result_obj    = json_decode( $post->post_content, null, 512, JSON_THROW_ON_ERROR );
 						$task_id       = $result_obj->id;
 						$schedules     = get_post_meta( $task_id, PS_OPENRPA_SCHEDULE_KEY );
 						$schedules_tag = '';
@@ -62,6 +62,7 @@ if ( function_exists( 'wp_get_current_user' ) ) {
 								$schedules_tag .= '<br>' . $schedule['description'];
 							}
 						}
+
 						echo '<tr>';
 						echo '<td class="align-middle">' . esc_html( $result_obj->name ) . '</td>';
 						echo '<td class="align-middle">' . esc_html( $result_obj->start ) . '</td>';
@@ -81,7 +82,7 @@ if ( function_exists( 'wp_get_current_user' ) ) {
 	<div class="row">
 		<div class="col text-end history-pagination">
 			<?php
-			$big             = 9999999;
+			$big             = 9_999_999;
 			$pagination_args = array(
 				'base'      => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
 				'format'    => '?paged=%#%',

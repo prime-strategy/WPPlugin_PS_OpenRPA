@@ -7,16 +7,23 @@ if ( ! defined( 'PS_OPENRPA_SCHEDULE_KEY' ) ) {
 	define( 'PS_OPENRPA_SCHEDULE_KEY', '_schedule_time' );
 }
 
+/**
+ * Task 設定 JSON データフォーマットの保存バージョン
+ * 
+ * @var string
+ */
+const PS_OPENRPA_TASK_JSON_VERSION = '1.0';
+
 // 週
 function ps_openrpa_get_week() {
 	return array(
+		'sunday'    => '日',
 		'monday'    => '月',
 		'tuesday'   => '火',
 		'wednesday' => '水',
 		'thursday'  => '木',
 		'friday'    => '金',
 		'saturday'  => '土',
-		'sunday'    => '日',
 	);
 }
 
@@ -47,8 +54,8 @@ function ps_openrpa_check_taskname( $user_id, $name ) {
 	);
 	$posts = get_posts( $args );
 
-	foreach ( $posts as $key => $post ) {
-		$task_obj = json_decode( $post->post_content );
+	foreach ( $posts as $post ) {
+		$task_obj = json_decode( $post->post_content, null, 512, JSON_THROW_ON_ERROR );
 
 		if ( $name === $task_obj->name ) {
 			return false;
@@ -59,7 +66,7 @@ function ps_openrpa_check_taskname( $user_id, $name ) {
 }
 
 // タスク登録
-function ps_openrpa_add_task( $user_id, $now, $task_name, $command ) {
+function ps_openrpa_add_task( $user_id, $task_name, $command ) {
 	if ( ! check_admin_referer( 'openrpa_task' ) ) {
 		return false;
 	}
@@ -71,21 +78,23 @@ function ps_openrpa_add_task( $user_id, $now, $task_name, $command ) {
 		return false;
 	}
 
+	$timezone     = new \DateTimeZone( 'UTC' );
+	$now          = new \DateTimeImmutable( 'now', $timezone );
 	$post_content = array(
+		'version' => PS_OPENRPA_TASK_JSON_VERSION,
 		'name'    => $task_name,
 		'command' => $command,
 	);
-	$post_args    = array(
-		'post_title'   => "{$user_id}_{$now}",
-		'post_content' => wp_json_encode( $post_content, JSON_UNESCAPED_UNICODE ),
-		'post_type'    => 'task',
-		'post_author'  => $user_id,
-		'post_status'  => 'publish',
-	);
 
-	$post_id = wp_insert_post( $post_args );
-
-	return $post_id;
+	return wp_insert_post( 
+		array(
+			'post_title'   => $user_id . $now->format( '_Ymd_His' ),
+			'post_content' => wp_json_encode( $post_content, JSON_UNESCAPED_UNICODE ),
+			'post_type'    => 'task',
+			'post_author'  => $user_id,
+			'post_status'  => 'publish',
+		)
+	 );
 }
 
 // スケジュール登録
@@ -142,8 +151,8 @@ function ps_openrpa_add_schedule( $post_id, $post_sanitize ) {
 				$post_id,
 				PS_OPENRPA_SCHEDULE_KEY,
 				array(
-					'format'      => "P{$dotw['calc']}WT{$delta['hour']}H{$delta['minute']}M",
-					'description' => "毎週{$dotw['description']}曜日{$delta['hour']}時および{$delta['minute']}分に開始",
+					'format'      => "P{$dotw['calc']}AT{$delta['hour']}H{$delta['minute']}M",
+					'description' => "毎週{$dotw['description']}曜日{$delta['hour']}時{$delta['minute']}分に開始",
 				),
 			);
 			break;
@@ -153,13 +162,12 @@ function ps_openrpa_add_schedule( $post_id, $post_sanitize ) {
 				$post_id,
 				PS_OPENRPA_SCHEDULE_KEY,
 				array(
-					'format'      => "P{$delta['month']}M{$dotw['calc']}WT{$delta['hour']}H{$delta['minute']}M",
-					'description' => "{$delta['month']}カ月ごと毎週{$dotw['description']}曜日および{$delta['hour']}時{$delta['minute']}分に開始",
+					'format'      => "P{$delta['month']}M{$dotw['calc']}AT{$delta['hour']}H{$delta['minute']}M",
+					'description' => "{$delta['month']}カ月ごと毎週{$dotw['description']}曜日 {$delta['hour']}時{$delta['minute']}分に開始",
 				),
 			);
 			break;
 		case 'custom':
-			break;
 		default:
 			break;
 	}
@@ -179,30 +187,30 @@ function ps_openrpa_calc_dotw( $post_sanitize, $week ) {
 }
 
 // 入力エラーチェック
-function ps_openrpa_error_check( $post_sanitize ) {
+function ps_openrpa_error_check( array $post_sanitize, string $type = '' ) {
 	$error = false;
 	$week  = ps_openrpa_get_week();
 
 	// task_nameが空の場合エラー
-	if ( '' === $post_sanitize['task_name'] ?? '' ) {
+	if ( '' === ( $post_sanitize['task_name'] ?? '' ) && 'additional_schedule' !== $type ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※タスク名を入力してください<br>";});</script>';
 		$error = true;
 	}
 
 	// commandが空の場合エラー
-	if ( '' === $post_sanitize['command'] ?? '' ) {
+	if ( '' === ( $post_sanitize['command'] ?? '' ) && 'additional_schedule' !== $type ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※コマンドを入力してください<br>";});</script>';
 		$error = true;
 	}
 
 	// scheduleが分で0分毎の場合エラー
-	if ( 'minute' === $post_sanitize['schedule'] ?? '' && '0' === $post_sanitize['minute'] ?? '0' ) {
+	if ( 'minute' === ( $post_sanitize['schedule'] ?? '' ) && '0' === ( $post_sanitize['minute'] ?? '0' ) ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※分ごとの実行の場合0は指定できません<br>";});</script>';
 		$error = true;
 	}
 
 	// scheduleが週、月で曜日が一つもない場合エラー
-	if ( in_array( $post_sanitize['schedule'], array( 'week', 'month' ), true ) && array_intersect_key( $post_sanitize, $week ) === array() ) {
+	if ( in_array( ( $post_sanitize['schedule'] ?? '' ), array( 'week', 'month' ), true ) && array() === array_intersect_key( $post_sanitize, $week ) ) {
 		echo '<script>window.addEventListener("load", function(){document.getElementById("error").innerHTML+="※曜日を指定してください<br>";});</script>';
 		$error = true;
 	}
@@ -216,9 +224,7 @@ if ( function_exists( 'wp_get_current_user' ) ) {
 }
 
 if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
-	$nonce_auth = ps_openrapa_nonce_auth();
-
-	if ( ! $nonce_auth ) {
+	if ( ! check_admin_referer( 'openrpa_task' ) ) {
 		return false;
 	}
 
@@ -229,7 +235,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
 	if ( isset( $post_sanitize['command'] ) && isset( $post_sanitize['schedule'] ) && ! ps_openrpa_error_check( $post_sanitize ) ) {
 		$command   = $post_sanitize['command'];
 		$task_name = $post_sanitize['task_name'];
-		$post_id   = ps_openrpa_add_task( $user->ID, date( 'Ymd_His' ), $task_name, $command );
+		$post_id   = ps_openrpa_add_task( $user->ID, $task_name, $command );
 
 		if ( $post_id ) {
 			$postmeta_id = ps_openrpa_add_schedule( $post_id, $post_sanitize );
@@ -273,7 +279,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
 	if ( isset( $post_sanitize['additional_schedule'] ) ) {
 		$post_id = $post_sanitize['additional_schedule'];
 
-		if ( ! ps_openrpa_error_check( $post_sanitize ) ) {
+		if ( ! ps_openrpa_error_check( $post_sanitize, 'additional_schedule' ) ) {
 			$postmeta_id = ps_openrpa_add_schedule( $post_id, $post_sanitize );
 		}
 	}
@@ -345,20 +351,6 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
 				</div>
 
 				<div class="col-8" id="schedule_form">
-					<div class="row schedule_forms" style="margin-bottom: 5px;">
-						<div class="col-2" id="minute_pre_text"></div>
-						<div class="col-6">
-							<select class="form-select" name="minute">
-								<?php
-								for ( $i = 0; $i < 60; $i += 5 ) {
-									echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . '</option>';
-								}
-								?>
-							</select>
-						</div>
-						<div class="col-4" id="minute_text">分ごとに開始</div>
-					</div>
-
 					<div class="row">
 						<p class="">※このプロセスは(UTC)協定世界時のタイムゾーンでスケジュール設定され、夏時間の調整も自動的に行われます</p>
 					</div>
@@ -388,46 +380,32 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
 					<div class="row">
 						<div class="col-2" style="border-right: 1px solid black;">
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="minute" id="minute" style="margin: auto; float: none;" checked>
-								<label class="form-check-label" for="minute">分</label>
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="minute" id="modal_minute" style="margin: auto; float: none;" checked>
+								<label class="form-check-label" for="modal_minute">分</label>
 							</div>
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="hour" id="hour" style="margin: auto; float: none;">
-								<label class="form-check-label" for="hour">時間</label>
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="hour" id="modal_hour" style="margin: auto; float: none;">
+								<label class="form-check-label" for="modal_hour">時間</label>
 							</div>
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="day" id="day" style="margin: auto; float: none;">
-								<label class="form-check-label" for="day">日</label>
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="day" id="modal_day" style="margin: auto; float: none;">
+								<label class="form-check-label" for="modal_day">日</label>
 							</div>
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="week" id="week" style="margin: auto; float: none;">
-								<label class="form-check-label" for="week">週</label>
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="week" id="modal_week" style="margin: auto; float: none;">
+								<label class="form-check-label" for="modal_week">週</label>
 							</div>
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="month" id="month" style="margin: auto; float: none;">
-								<label class="form-check-label" for="month">月</label>
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" value="month" id="modal_month" style="margin: auto; float: none;">
+								<label class="form-check-label" for="modal_month">月</label>
 							</div>
 							<div class="form-check" style="padding-left: 0;">
-								<input type="radio" class="form-check-input modal_schedule" name="schedule" id="custom" style="margin: auto; float: none;" disabled>
-								<label class="form-check-label" for="custom">カスタム</label>
+								<input type="radio" class="form-check-input modal_schedule" name="schedule" id="modal_custom" style="margin: auto; float: none;" disabled>
+								<label class="form-check-label" for="modal_custom">カスタム</label>
 							</div>
 						</div>
 
 						<div class="col-8" id="modal_schedule_form">
-							<div class="row modal_schedule_forms" style="margin-bottom: 5px;">
-								<div class="col-2" id="modal_minute_pre_text"></div>
-								<div class="col-6">
-									<select class="form-select" name="minute">
-										<?php
-										for ( $i = 0; $i < 60; $i += 5 ) {
-											echo '<option value="' . esc_attr( $i ) . '">' . esc_html( $i ) . '</option>';
-										}
-										?>
-									</select>
-								</div>
-								<div class="col-4" id="modal_minute_text">分ごとに開始</div>
-							</div>
-
 							<div class="row">
 								<p class="">※このプロセスは(UTC)協定世界時のタイムゾーンでスケジュール設定され、夏時間の調整も自動的に行われます</p>
 							</div>
@@ -482,8 +460,8 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
 				$max_pages = $query->max_num_pages;
 
 				if ( $query->have_posts() ) {
-					foreach ( $query->posts as $key => $post ) {
-						$task_obj  = json_decode( $post->post_content );
+					foreach ( $query->posts as $post ) {
+						$task_obj  = json_decode( $post->post_content, null, 512, JSON_THROW_ON_ERROR );
 						$schedules = get_post_meta( $post->ID, PS_OPENRPA_SCHEDULE_KEY );
 
 						echo '<tr>';
@@ -513,7 +491,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ?? '' ) {
 	<div class="row">
 		<div class="col text-end task-pagination">
 			<?php
-			$big             = 9999999;
+			$big             = 9_999_999;
 			$pagination_args = array(
 				'base'      => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
 				'format'    => '?paged=%#%',

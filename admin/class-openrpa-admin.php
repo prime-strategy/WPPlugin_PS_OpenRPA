@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Admin Menu Class
  */
-class PS_OpenRPA_Admin {
+final class PS_OpenRPA_Admin {
 
 	/**
 	 * Initializes WordPress Hooks
@@ -22,22 +22,20 @@ class PS_OpenRPA_Admin {
 
 	/**
 	 * Enqueue Needed Styles Or Scripts Library
-	 *
-	 * @access public
 	 */
-	public function enqueue() {
-		wp_enqueue_script( 'jquery-js', plugins_url( 'assets/js/lib/bootstrap.min.js', __DIR__ ), array(), '5.3.0' );
-		wp_enqueue_style( 'jquery-css', plugins_url( 'assets/css/lib/bootstrap.min.css', __DIR__ ), array(), '5.3.0' );
-		wp_enqueue_script( 'lightbox-js', plugins_url( 'assets/js/lib/lightbox.js', __DIR__ ), array(), '2.11.4' );
-		wp_enqueue_style( 'lightbox-css', plugins_url( 'assets/css/lib/lightbox.css', __DIR__ ), array(), '2.11.4' );
-		wp_enqueue_style( 'ps-openrpa-css', plugins_url( 'assets/css/ps-openrpa-admin.css', __DIR__ ), array(), '1.0.0' );
-		wp_enqueue_script( 'ps-openrpa-js', plugins_url( 'assets/js/ps-openrpa-admin.js', __DIR__ ), array(), '1.0.0' );
+	public function enqueue( $hook_suffix ) {
+		if ( 'toplevel_page_ps-openrpa' === $hook_suffix || str_starts_with( $hook_suffix, 'ps-openrpa_page' ) ) {
+			wp_enqueue_script( 'bootstrap-js', plugins_url( 'assets/js/lib/bootstrap.min.js', __DIR__ ), array(), '5.3.0' );
+			wp_enqueue_style( 'bootstrap-css', plugins_url( 'assets/css/lib/bootstrap.min.css', __DIR__ ), array(), '5.3.0' );
+			wp_enqueue_script( 'lightbox-js', plugins_url( 'assets/js/lib/lightbox.js', __DIR__ ), array(), '2.11.4' );
+			wp_enqueue_style( 'lightbox-css', plugins_url( 'assets/css/lib/lightbox.css', __DIR__ ), array(), '2.11.4' );
+			wp_enqueue_script( 'ps-openrpa-js', plugins_url( 'assets/js/ps-openrpa-admin.js', __DIR__ ), array(), '1.0.0' );
+			wp_enqueue_style( 'ps-openrpa-css', plugins_url( 'assets/css/ps-openrpa-admin.css', __DIR__ ), array(), '1.0.0' );
+		}
 	}
 
 	/**
 	 * Added Setting Menu Page
-	 *
-	 * @access public
 	 */
 	public function admin_menu() {
 		add_menu_page(
@@ -53,7 +51,7 @@ class PS_OpenRPA_Admin {
 			'ps-openrpa', // parent slug
 			'タスク登録',
 			'タスク登録',
-			'administrator', //role
+			'administrator', // role
 			'ps-openrpa-task',
 			array( $this, 'load_task_page' ),
 		);
@@ -70,8 +68,6 @@ class PS_OpenRPA_Admin {
 
 	/**
 	 * Load Main Page
-	 *
-	 * @access public
 	 */
 	public function load_main_page() {
 		include_once PS_OPENRPA_PATH . 'templates/top.php';
@@ -79,8 +75,6 @@ class PS_OpenRPA_Admin {
 
 	/**
 	 * Load Task Registration Page
-	 *
-	 * @access public
 	 */
 	public function load_task_page() {
 		include_once PS_OPENRPA_PATH . 'templates/task.php';
@@ -88,8 +82,6 @@ class PS_OpenRPA_Admin {
 
 	/**
 	 * Load History Page
-	 *
-	 * @access public
 	 */
 	public function load_history_page() {
 		include_once PS_OPENRPA_PATH . 'templates/history.php';
