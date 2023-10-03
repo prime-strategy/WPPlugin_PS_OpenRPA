@@ -1,6 +1,7 @@
 /.wordpress-org export-ignore
 /.github export-ignore
 /bin export-ignore
+/docs export-ignore
 /test export-ignore
 
 /.gitattributes export-ignore
