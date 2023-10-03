@@ -1,4 +1,4 @@
-=== [PS OpenRPA] ===
+=== PS OpenRPA ===
 
 Contributors: primestrategy
 Tags: openrpa
@@ -11,14 +11,14 @@ Requires PHP: 8.0
 
 == Description ==
 
-* WordPressとOpenRPAを連携させるプラグインです。
-* プラグイン側でスケジュールを設定すると指定したスケジュールでローカルPCのOpenRPAタスクを実行できるようになります。
-* クライアント - サーバ間はWindowsタスクスケジューラを利用したPowerShellスクリプトの実行です、動作保証OSはWindowsのみとなります。
+* WordPress と OpenRPA を連携させるプラグインです。
+* プラグイン側でスケジュールを設定すると指定したスケジュールでローカル PC の OpenRPA タスクを実行できるようになります。
+* クライアント - サーバ間は Windows タスクスケジューラを利用した PowerShell スクリプトの実行です。動作保証 OS は Windows 10/11 のみとなります。
 
 == Installation ==
 
  1. プラグインメニューから「新規追加」をクリック
- 2. 検索フォームに「openrpa」を入力
+ 2. 検索フォームに「ps openrpa」を入力
  3. 「PS OpenRPA」プラグインを選択し、「今すぐインストール」をクリック
  4. プラグインを有効化する
 

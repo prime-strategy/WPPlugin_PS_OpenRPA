@@ -1,16 +1,13 @@
 name: Plugin asset/readme update
 
-env:
-  SLUG: "ps-openrpa"
-
 on:
   push:
     branches:
-    - trunk
+    - main
 
 jobs:
-  trunk:
-    name: Push to trunk
+  main:
+    name: Push to main
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
@@ -19,4 +16,4 @@ jobs:
       env:
         SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
         SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
-        SLUG: ${{ env.SLUG }}
+        SLUG: ${{ vars.WP_PLUGIN_SLUG }}
