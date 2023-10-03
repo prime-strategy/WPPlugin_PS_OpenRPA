@@ -1,7 +1,7 @@
 name: Plugin asset/readme update
 
 env:
-  SLUG: "PS-OpenRPA"
+  SLUG: "ps-openrpa"
 
 on:
   push:
